@@ -1,0 +1,245 @@
+
+
+DATAS SEGMENT
+    ;此处输入数据段代码 
+RIGHT DB ?
+LEFT  DB ? 
+LOGO  DB 7 DUP(?)
+LOGOLOCAL DB ?
+ZLOCALH DB ?
+ZLOCALL DB ?
+CNT   DB ?
+CNT2  DB ?
+SCORE DB ?
+TEXT DB 'SCORE:','$'
+TEXT2 DB 'TIME:','$'
+TIME DB '00:00:00','$'
+ZERO DB 0
+DBUFFER DB 8 DUP (':'),'$'
+DBUFFER2 DB 8 DUP (':'),'$'
+DATAS ENDS
+
+STACKS SEGMENT
+    ;此处输入堆栈段代码
+STACKS ENDS
+
+
+
+CODES SEGMENT
+    ASSUME CS:CODES,DS:DATAS,SS:STACKS
+START:
+MAIN PROC FAR
+    MOV AX,DATAS
+    MOV DS,AX
+    
+    ;此处输入代码段代码
+    ;设置时间位置
+    MOV AH,02
+    MOV BH,00
+    MOV DL,00
+    MOV DH,00
+    INT 10H
+    MOV AH,09
+    MOV DX,OFFSET TEXT2
+    INT 21H
+    MOV AH,2C
+    INT 21H
+    
+    ;设置分数位置
+    MOV AH,02
+    MOV BH,00
+    MOV DL,50
+    MOV DH,00
+    INT 10H
+    MOV AH,09
+    MOV DX,OFFSET TEXT
+    INT 21H
+    ;设置射击目标
+    MOV CX,7
+    MOV AH,02
+    MOV BH,00
+    MOV DL,20
+    MOV DH,10
+    INT 10H
+    MOV SI,OFFSET LOGO
+SET:
+    MOV [SI],DL
+    MOV LOGOLOCAL,DL
+    MOV AH,02
+    MOV DL,06H
+    INT 21H
+    INC LOGOLOCAL
+    INC SI
+    MOV DL,LOGOLOCAL
+    DEC CX
+    JNZ SET
+    
+    ;设置光标位置
+    MOV AH,02
+    MOV BH,00
+    MOV DL,00
+    MOV RIGHT,DL
+    MOV DH,20
+    INT 10H
+    
+    ;设置子弹发射点位置
+    MOV AH,02
+    MOV DL,06H
+    INT 21H
+    
+    MOV AH,02
+    MOV BH,00
+    MOV DL,00
+    MOV DH,20
+    INT 10H
+    ;实现发射点移动
+AGAIN:
+
+    MOV AH,01H
+    INT 16H
+    JZ AGAIN
+    MOV AH,0
+    INT 16H
+    CMP AL,'E'
+    JE EXIT
+    CMP AL,' '
+    JE LAUNCH
+    
+MOVLF:
+    CMP AH,4BH
+    JNE MOVRG
+    MOV LEFT,DL
+    MOV AH,02H
+    MOV DL,' '
+    INT 21H
+    DEC LEFT
+    MOV DL,LEFT
+    MOV AH,02
+    INT 10H
+    MOV AH,02
+    INT 10H
+    MOV AH,02
+    MOV DL,06H
+    INT 21H
+    MOV DL,LEFT
+    MOV AH,02
+    INT 10H
+    JMP AGAIN
+MOVRG:
+    CMP AH,4DH
+    JNE AGAIN
+    MOV RIGHT,DL
+    MOV AH,02H
+    MOV DL,' '
+    INT 21H
+    INC RIGHT
+    MOV DL,RIGHT
+    MOV AH,02H
+    INT 10H
+    MOV AH,02
+    MOV DL,06H
+    INT 21H
+    MOV DL,RIGHT
+    MOV AH,02
+    INT 10H
+    JMP AGAIN
+
+LAUNCH:
+    MOV CNT,5
+LAUNCHMV:    
+    MOV ZLOCALH,DH
+    MOV ZLOCALL,DL
+    DEC ZLOCALH
+    DEC ZLOCALH
+    CALL TDELAY
+    MOV DH,ZLOCALH
+    MOV AH,02
+    INT 10H
+    MOV AH,02
+    MOV DL,'A'
+    INT 21H
+    MOV DL,ZLOCALL
+    MOV AH,02
+    INT 10H
+    CALL TDELAY
+    MOV DH,ZLOCALH
+    MOV AH,02
+    INT 10H
+    MOV AH,02
+    MOV DL,' '
+    INT 21H
+    MOV DL,ZLOCALL
+    MOV AH,02
+    INT 10H
+    DEC CNT
+    JNZ LAUNCHMV
+    CALL JUDGE
+    
+    MOV AH,02
+    MOV DH,20
+    MOV DL,ZLOCALL
+    INT 10H
+    JMP AGAIN
+    
+
+    
+EXIT:
+    MOV AH,4CH
+    INT 21H
+    
+    MAIN ENDP
+    ;-------------
+TDELAY PROC NEAR
+    PUSH AX
+W1:
+    IN AL,61H
+    AND AL,00010000B
+    CMP AL,AH
+    JE W1
+    MOV AH,AL
+    LOOP W1
+    POP AX
+    RET
+    TDELAY ENDP
+
+JUDGE PROC NEAR
+    MOV SI,OFFSET LOGO
+    MOV CNT2,7
+    MOV AH,03
+    MOV BH,00
+    INT 10H
+CSCORE:
+    CMP DL,[SI]
+    JE  GSCORE
+    INC SI
+    DEC CNT2
+    JNZ CSCORE
+    JMP EXIT2
+GSCORE:
+    MOV BH,0
+    MOV [SI],BH
+    INC SCORE
+    MOV AH,02
+    MOV BH,00
+    MOV DL,56
+    MOV DH,00
+    INT 10H
+    OR  SCORE,30H
+    MOV AH,02
+    MOV DL,SCORE
+    INT 21H
+EXIT2:
+    RET
+    JUDGE ENDP
+       
+CODES ENDS
+      END START
+
+
+
+
+
+
+
+
+

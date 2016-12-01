@@ -1,0 +1,449 @@
+Microsoft (R) Macro Assembler Version 6.11		    12/01/16 23:50:24
+tempfile.asm						     Page 1 - 1
+
+
+				CURSOR MACRO ROW,COLUMN
+				       MOV AH,02H
+				       MOV BH,00
+				       MOV DH,ROW
+				       MOV DL,COLUMN  ;设置光标位置
+				       INT 10H
+				       ENDM
+				DISPLAY MACRO STRING
+				       MOV AH,09H
+				       MOV DX,OFFSET STRING  ;装入字符串地址
+				       INT 21H
+				       ENDM
+				FILL MACRO ROW_START,COL_START,ROW_END,COL_END,COLOR
+				       LOCAL START1,AGAIN
+				       MOV DX,ROW_START
+				START1:
+				       MOV CX,COL_START
+				AGAIN:
+				       MOV AH,0CH
+				       MOV AL,COLOR   ;写像素，AL中存放像素值
+				       INT 10H
+				       INC CX
+				       CMP CX,COL_END ;画一条水平线
+				       JNE AGAIN
+				       INC DX
+				       CMP DX,ROW_END ;增加行值画水平线，以此画出矩形
+				       JNE START1
+				       ENDM
+
+				       
+				              
+
+ 0000				DATAS SEGMENT
+				    ;此处输入数据段代码 
+ 0000 57 65 6C 63 6F 6D		MESSAGE_1 DB 'Welcome!','$'
+       65 21 24
+ 0009 45 4E 54 45 52 24		MESSAGE_2 DB 'ENTER','$'
+ 000F 4D 4F 44 45 4C 31		MESSAGE_3 DB 'MODEL1','$'
+       24
+ 0016 4D 4F 44 45 4C 32		MESSAGE_4 DB 'MODEL2','$'
+       24
+ 001D 4D 4F 44 45 4C 33		MESSAGE_5 DB 'MODEL3','$'
+       24
+ 0024 4D 4F 44 45 4C 34		MESSAGE_6 DB 'MODEL4','$'
+       24
+ 002B 45 58 49 54 24		MESSAGE_7 DB 'EXIT','$'
+ 0030 50 52 45 53 53 20		MESSAGE_8 DB 'PRESS ENTER TO ENTER','$'
+       45 4E 54 45 52 20
+       54 4F 20 45 4E 54
+       45 52 24
+ 0045 00			OLDVIDEO  DB ?
+ 0046 12			NEWVIDEO  DB 12H
+ 0047 00			WHEATHERIN DB ?
+ 0048				DATAS ENDS
+
+ 0000				STACKS SEGMENT
+				    ;此处输入堆栈段代码
+ 0000				STACKS ENDS
+
+ 0000				CODES SEGMENT
+				    ASSUME CS:CODES,DS:DATAS,SS:STACKS
+ 0000				START:
+ 0000				MAIN PROC 
+ 0000  B8 ---- R		    MOV AX,DATAS
+ 0003  8E D8			    MOV DS,AX
+				    ;此处输入代码段代码
+ 0005				FIRST:
+ 0005  B9 8178			    MOV CX,33144
+ 0008  E8 022D			    CALL TDELAY            ;此处延迟十分重要！！调试时没有这个延迟导致页面生成不对
+ 000B  B4 0F			    MOV AH,0FH
+ 000D  CD 10			    INT 10H                ;获得当前视频模式
+ 000F  A2 0045 R		    MOV OLDVIDEO,AL        ;保存当前视频模式
+ 0012  B8 0600			    MOV AX,0600H           ;清除屏幕
+ 0015  B7 07			    MOV BH,07
+ 0017  B9 0000			    MOV CX,0
+ 001A  BA 184F			    MOV DX,184FH
+ 001D  CD 10			    INT 10H
+ 001F  B4 00			    MOV AH,00H             ;设置新的视频模式
+ 0021  A0 0046 R		    MOV AL,NEWVIDEO
+ 0024  CD 10			    INT 10H
+				    CURSOR 0,0             ;设置光标在0,0
+ 0026  B4 02		     1	       MOV AH,02H
+ 0028  B7 00		     1	       MOV BH,00
+ 002A  B6 00		     1	       MOV DH,0
+ 002C  B2 00		     1	       MOV DL,0  ;设置光标位置
+ 002E  CD 10		     1	       INT 10H
+				    FILL 150,250,250,350,4 ;在150,250处画一个红框
+ 0030  BA 0096		     1	       MOV DX,150
+ 0033			     1	??0000:
+ 0033  B9 00FA		     1	       MOV CX,250
+ 0036			     1	??0001:
+ 0036  B4 0C		     1	       MOV AH,0CH
+ 0038  B0 04		     1	       MOV AL,4   ;写像素，AL中存放像素值
+ 003A  CD 10		     1	       INT 10H
+ 003C  41		     1	       INC CX
+ 003D  81 F9 015E	     1	       CMP CX,350 ;画一条水平线
+ 0041  75 F3		     1	       JNE ??0001
+ 0043  42		     1	       INC DX
+ 0044  81 FA 00FA	     1	       CMP DX,250 ;增加行值画水平线，以此画出矩形
+ 0048  75 E9		     1	       JNE ??0000
+				    CURSOR 6,194     
+ 004A  B4 02		     1	       MOV AH,02H
+ 004C  B7 00		     1	       MOV BH,00
+ 004E  B6 06		     1	       MOV DH,6
+ 0050  B2 C2		     1	       MOV DL,194  ;设置光标位置
+ 0052  CD 10		     1	       INT 10H
+				    DISPLAY MESSAGE_1
+ 0054  B4 09		     1	       MOV AH,09H
+ 0056  BA 0000 R	     1	       MOV DX,OFFSET MESSAGE_1  ;装入字符串地址
+ 0059  CD 21		     1	       INT 21H
+				    CURSOR 8,27
+ 005B  B4 02		     1	       MOV AH,02H
+ 005D  B7 00		     1	       MOV BH,00
+ 005F  B6 08		     1	       MOV DH,8
+ 0061  B2 1B		     1	       MOV DL,27  ;设置光标位置
+ 0063  CD 10		     1	       INT 10H
+				    DISPLAY MESSAGE_8
+ 0065  B4 09		     1	       MOV AH,09H
+ 0067  BA 0030 R	     1	       MOV DX,OFFSET MESSAGE_8  ;装入字符串地址
+ 006A  CD 21		     1	       INT 21H
+				    CURSOR 12,195
+ 006C  B4 02		     1	       MOV AH,02H
+ 006E  B7 00		     1	       MOV BH,00
+ 0070  B6 0C		     1	       MOV DH,12
+ 0072  B2 C3		     1	       MOV DL,195  ;设置光标位置
+ 0074  CD 10		     1	       INT 10H
+				    DISPLAY MESSAGE_2
+ 0076  B4 09		     1	       MOV AH,09H
+ 0078  BA 0009 R	     1	       MOV DX,OFFSET MESSAGE_2  ;装入字符串地址
+ 007B  CD 21		     1	       INT 21H
+ 007D  B8 0000			    MOV AX,0000H     ;初始化鼠标
+ 0080  CD 33			    INT 33H
+ 0082  B8 0001			    MOV AX,01H
+ 0085  CD 33			    INT 33H          ;检查鼠标光标
+ 0087				BACK:
+ 0087  B8 0003			    MOV AX,03H       ;检查是否按下鼠标
+ 008A  CD 33			    INT 33H
+ 008C  83 FB 01			    CMP BX,0001H     ;现在在cx=列dx=行的位置
+ 008F  75 F6			    JNE BACK         ;检查左键是否按下
+ 0091  81 F9 00FA		    CMP CX,250       ;看是否在框的右边
+ 0095  73 03 E9 0197		    JB NOT_INSIDE
+ 009A  81 F9 015E		    CMP CX,350
+ 009E  76 03 E9 018E		    JA NOT_INSIDE
+ 00A3  81 FA 0096		    CMP DX,150
+ 00A7  73 03 E9 0185		    JB NOT_INSIDE
+ 00AC  81 FA 00FA		    CMP DX,250
+ 00B0  76 03 E9 017C		    JA NOT_INSIDE     ;检查是否在框中
+
+ 00B5				SECONDPAINT:        
+ 00B5  B8 0600			    MOV AX,0600H           ;清除屏幕
+ 00B8  B7 07			    MOV BH,07
+ 00BA  B9 0000			    MOV CX,0
+ 00BD  BA 184F			    MOV DX,184FH
+ 00C0  CD 10			    INT 10H
+				    
+ 00C2  B4 00			    MOV AH,00H              ;设置新的视频模式
+ 00C4  A0 0046 R		    MOV AL,NEWVIDEO
+ 00C7  CD 10			    INT 10H
+				    
+				    CURSOR 0,0
+ 00C9  B4 02		     1	       MOV AH,02H
+ 00CB  B7 00		     1	       MOV BH,00
+ 00CD  B6 00		     1	       MOV DH,0
+ 00CF  B2 00		     1	       MOV DL,0  ;设置光标位置
+ 00D1  CD 10		     1	       INT 10H
+				    FILL 30,50,80,200,4
+ 00D3  BA 001E		     1	       MOV DX,30
+ 00D6			     1	??0002:
+ 00D6  B9 0032		     1	       MOV CX,50
+ 00D9			     1	??0003:
+ 00D9  B4 0C		     1	       MOV AH,0CH
+ 00DB  B0 04		     1	       MOV AL,4   ;写像素，AL中存放像素值
+ 00DD  CD 10		     1	       INT 10H
+ 00DF  41		     1	       INC CX
+ 00E0  81 F9 00C8	     1	       CMP CX,200 ;画一条水平线
+ 00E4  75 F3		     1	       JNE ??0003
+ 00E6  42		     1	       INC DX
+ 00E7  83 FA 50		     1	       CMP DX,80 ;增加行值画水平线，以此画出矩形
+ 00EA  75 EA		     1	       JNE ??0002
+				    CURSOR 3,12
+ 00EC  B4 02		     1	       MOV AH,02H
+ 00EE  B7 00		     1	       MOV BH,00
+ 00F0  B6 03		     1	       MOV DH,3
+ 00F2  B2 0C		     1	       MOV DL,12  ;设置光标位置
+ 00F4  CD 10		     1	       INT 10H
+				    DISPLAY MESSAGE_3
+ 00F6  B4 09		     1	       MOV AH,09H
+ 00F8  BA 000F R	     1	       MOV DX,OFFSET MESSAGE_3  ;装入字符串地址
+ 00FB  CD 21		     1	       INT 21H
+				    FILL 110,50,160,200,4
+ 00FD  BA 006E		     1	       MOV DX,110
+ 0100			     1	??0004:
+ 0100  B9 0032		     1	       MOV CX,50
+ 0103			     1	??0005:
+ 0103  B4 0C		     1	       MOV AH,0CH
+ 0105  B0 04		     1	       MOV AL,4   ;写像素，AL中存放像素值
+ 0107  CD 10		     1	       INT 10H
+ 0109  41		     1	       INC CX
+ 010A  81 F9 00C8	     1	       CMP CX,200 ;画一条水平线
+ 010E  75 F3		     1	       JNE ??0005
+ 0110  42		     1	       INC DX
+ 0111  81 FA 00A0	     1	       CMP DX,160 ;增加行值画水平线，以此画出矩形
+ 0115  75 E9		     1	       JNE ??0004
+				    CURSOR 8,12
+ 0117  B4 02		     1	       MOV AH,02H
+ 0119  B7 00		     1	       MOV BH,00
+ 011B  B6 08		     1	       MOV DH,8
+ 011D  B2 0C		     1	       MOV DL,12  ;设置光标位置
+ 011F  CD 10		     1	       INT 10H
+				    DISPLAY MESSAGE_4
+ 0121  B4 09		     1	       MOV AH,09H
+ 0123  BA 0016 R	     1	       MOV DX,OFFSET MESSAGE_4  ;装入字符串地址
+ 0126  CD 21		     1	       INT 21H
+				    FILL 190,50,240,200,4
+ 0128  BA 00BE		     1	       MOV DX,190
+ 012B			     1	??0006:
+ 012B  B9 0032		     1	       MOV CX,50
+ 012E			     1	??0007:
+ 012E  B4 0C		     1	       MOV AH,0CH
+ 0130  B0 04		     1	       MOV AL,4   ;写像素，AL中存放像素值
+ 0132  CD 10		     1	       INT 10H
+ 0134  41		     1	       INC CX
+ 0135  81 F9 00C8	     1	       CMP CX,200 ;画一条水平线
+ 0139  75 F3		     1	       JNE ??0007
+ 013B  42		     1	       INC DX
+ 013C  81 FA 00F0	     1	       CMP DX,240 ;增加行值画水平线，以此画出矩形
+ 0140  75 E9		     1	       JNE ??0006
+				    CURSOR 13,12
+ 0142  B4 02		     1	       MOV AH,02H
+ 0144  B7 00		     1	       MOV BH,00
+ 0146  B6 0D		     1	       MOV DH,13
+ 0148  B2 0C		     1	       MOV DL,12  ;设置光标位置
+ 014A  CD 10		     1	       INT 10H
+				    DISPLAY MESSAGE_5
+ 014C  B4 09		     1	       MOV AH,09H
+ 014E  BA 001D R	     1	       MOV DX,OFFSET MESSAGE_5  ;装入字符串地址
+ 0151  CD 21		     1	       INT 21H
+				    FILL 270,50,320,200,4
+ 0153  BA 010E		     1	       MOV DX,270
+ 0156			     1	??0008:
+ 0156  B9 0032		     1	       MOV CX,50
+ 0159			     1	??0009:
+ 0159  B4 0C		     1	       MOV AH,0CH
+ 015B  B0 04		     1	       MOV AL,4   ;写像素，AL中存放像素值
+ 015D  CD 10		     1	       INT 10H
+ 015F  41		     1	       INC CX
+ 0160  81 F9 00C8	     1	       CMP CX,200 ;画一条水平线
+ 0164  75 F3		     1	       JNE ??0009
+ 0166  42		     1	       INC DX
+ 0167  81 FA 0140	     1	       CMP DX,320 ;增加行值画水平线，以此画出矩形
+ 016B  75 E9		     1	       JNE ??0008
+				    CURSOR 18,12
+ 016D  B4 02		     1	       MOV AH,02H
+ 016F  B7 00		     1	       MOV BH,00
+ 0171  B6 12		     1	       MOV DH,18
+ 0173  B2 0C		     1	       MOV DL,12  ;设置光标位置
+ 0175  CD 10		     1	       INT 10H
+				    DISPLAY MESSAGE_6
+ 0177  B4 09		     1	       MOV AH,09H
+ 0179  BA 0024 R	     1	       MOV DX,OFFSET MESSAGE_6  ;装入字符串地址
+ 017C  CD 21		     1	       INT 21H
+				    FILL 400,500,450,600,4
+ 017E  BA 0190		     1	       MOV DX,400
+ 0181			     1	??000A:
+ 0181  B9 01F4		     1	       MOV CX,500
+ 0184			     1	??000B:
+ 0184  B4 0C		     1	       MOV AH,0CH
+ 0186  B0 04		     1	       MOV AL,4   ;写像素，AL中存放像素值
+ 0188  CD 10		     1	       INT 10H
+ 018A  41		     1	       INC CX
+ 018B  81 F9 0258	     1	       CMP CX,600 ;画一条水平线
+ 018F  75 F3		     1	       JNE ??000B
+ 0191  42		     1	       INC DX
+ 0192  81 FA 01C2	     1	       CMP DX,450 ;增加行值画水平线，以此画出矩形
+ 0196  75 E9		     1	       JNE ??000A
+				    CURSOR 26,67
+ 0198  B4 02		     1	       MOV AH,02H
+ 019A  B7 00		     1	       MOV BH,00
+ 019C  B6 1A		     1	       MOV DH,26
+ 019E  B2 43		     1	       MOV DL,67  ;设置光标位置
+ 01A0  CD 10		     1	       INT 10H
+				    DISPLAY MESSAGE_7
+ 01A2  B4 09		     1	       MOV AH,09H
+ 01A4  BA 002B R	     1	       MOV DX,OFFSET MESSAGE_7  ;装入字符串地址
+ 01A7  CD 21		     1	       INT 21H
+				    
+ 01A9  B8 0000			    MOV AX,0000H
+ 01AC  CD 33			    INT 33H                  ;初始化鼠标
+ 01AE  B8 0001			    MOV AX,01H
+ 01B1  CD 33			    INT 33H     
+ 01B3				BACK2:
+ 01B3  B8 0003			    MOV AX,03H                ;检查鼠标
+ 01B6  CD 33			    INT 33H
+ 01B8  83 FB 01			    CMP BX,0001H
+ 01BB  75 F6			    JNE BACK2
+ 01BD  83 F9 32			    CMP CX,50
+ 01C0  72 10			    JB  MODEL2
+ 01C2  83 FA 1E			    CMP DX,30
+ 01C5  72 0B			    JB  MODEL2
+ 01C7  81 F9 00C8		    CMP CX,200
+ 01CB  77 05			    JA  MODEL2
+ 01CD  83 FA 50			    CMP DX,80
+ 01D0  77 00			    JA  MODEL2           ;判断是否在模块一中
+				    ;CALL MODEL1
+ 01D2				MODEL2:   
+ 01D2  83 F9 32			    CMP CX,50
+ 01D5  72 11			    JB  MODEL3
+ 01D7  83 FA 6E			    CMP DX,110
+ 01DA  72 0C			    JB  MODEL3
+ 01DC  81 F9 00C8		    CMP CX,200
+ 01E0  77 06			    JA  MODEL3
+ 01E2  81 FA 00A0		    CMP DX,160
+ 01E6  77 00			    JA  MODEL3
+				    ;CALL MODEL2               ;判断是否在模块2
+ 01E8				MODEL3:    
+ 01E8  83 F9 32			    CMP CX,50
+ 01EB  72 12			    JB  MODEL4
+ 01ED  81 FA 00BE		    CMP DX,190
+ 01F1  72 0C			    JB  MODEL4
+ 01F3  81 F9 00C8		    CMP CX,200
+ 01F7  77 06			    JA  MODEL4
+ 01F9  81 FA 00F0		    CMP DX,240
+ 01FD  77 00			    JA  MODEL4
+				    ;CALL MODEL3                ;判断是否在模块3中
+ 01FF				MODEL4:    
+ 01FF  83 F9 32			    CMP CX,50
+ 0202  72 12			    JB  EXITMAIN
+ 0204  81 FA 010E		    CMP DX,270
+ 0208  72 0C			    JB  EXITMAIN
+ 020A  81 F9 00C8		    CMP CX,200
+ 020E  77 06			    JA  EXITMAIN
+ 0210  81 FA 0140		    CMP DX,320
+ 0214  77 00			    JA  EXITMAIN
+				    ;CALL MODEL4                 ;判断是否在模块4中
+ 0216				EXITMAIN:   
+ 0216  81 F9 01F4		    CMP CX,500
+ 021A  72 18			    JB  NOT_INSIDE2
+ 021C  81 FA 0190		    CMP DX,400
+ 0220  72 12			    JB  NOT_INSIDE2
+ 0222  81 F9 0258		    CMP CX,600
+ 0226  77 0C			    JA  NOT_INSIDE2
+ 0228  81 FA 01C2		    CMP DX,450
+ 022C  77 06			    JA  NOT_INSIDE2
+ 022E  E9 FDD4			    JMP FIRST
+
+ 0231				NOT_INSIDE:
+ 0231  E9 FE53			    JMP BACK
+				    
+ 0234				NOT_INSIDE2:
+				   
+ 0234  B4 4C			    MOV AH,4CH
+ 0236  CD 21			    INT 21H
+ 0238				MAIN ENDP
+
+ 0238				TDELAY PROC NEAR
+ 0238  50			     PUSH AX
+ 0239				W1:  
+ 0239  E4 61			     IN  AL,61H
+ 023B  24 10			     AND AL,00010000B
+ 023D  38 E0			     CMP AL,AH
+ 023F  74 F8			     JE  W1
+ 0241  8A E0			     MOV AH,AL
+ 0243  E2 F4			     LOOP W1
+ 0245  58			     POP AX
+ 0246  C3			     RET
+ 0247				TDELAY ENDP
+				 
+
+ 0247				CODES ENDS
+				    END START
+
+Microsoft (R) Macro Assembler Version 6.11		    12/01/16 23:50:24
+tempfile.asm						     Symbols 2 - 1
+
+
+
+
+Macros:
+
+                N a m e                 Type
+
+CURSOR . . . . . . . . . . . . .	Proc
+DISPLAY  . . . . . . . . . . . .	Proc
+FILL . . . . . . . . . . . . . .	Proc
+
+
+Segments and Groups:
+
+                N a m e                 Size     Length   Align   Combine Class
+
+CODES  . . . . . . . . . . . . .	16 Bit	 0247	  Para	  Private 
+DATAS  . . . . . . . . . . . . .	16 Bit	 0048	  Para	  Private 
+STACKS . . . . . . . . . . . . .	16 Bit	 0000	  Para	  Private 
+
+
+Procedures,  parameters and locals:
+
+                N a m e                 Type     Value    Attr
+
+MAIN . . . . . . . . . . . . . .	P Near	 0000	  CODES	Length= 0238 Public
+  FIRST  . . . . . . . . . . . .	L Near	 0005	  CODES	
+  ??0000 . . . . . . . . . . . .	L Near	 0033	  CODES	
+  ??0001 . . . . . . . . . . . .	L Near	 0036	  CODES	
+  BACK . . . . . . . . . . . . .	L Near	 0087	  CODES	
+  SECONDPAINT  . . . . . . . . .	L Near	 00B5	  CODES	
+  ??0002 . . . . . . . . . . . .	L Near	 00D6	  CODES	
+  ??0003 . . . . . . . . . . . .	L Near	 00D9	  CODES	
+  ??0004 . . . . . . . . . . . .	L Near	 0100	  CODES	
+  ??0005 . . . . . . . . . . . .	L Near	 0103	  CODES	
+  ??0006 . . . . . . . . . . . .	L Near	 012B	  CODES	
+  ??0007 . . . . . . . . . . . .	L Near	 012E	  CODES	
+  ??0008 . . . . . . . . . . . .	L Near	 0156	  CODES	
+  ??0009 . . . . . . . . . . . .	L Near	 0159	  CODES	
+  ??000A . . . . . . . . . . . .	L Near	 0181	  CODES	
+  ??000B . . . . . . . . . . . .	L Near	 0184	  CODES	
+  BACK2  . . . . . . . . . . . .	L Near	 01B3	  CODES	
+  MODEL2 . . . . . . . . . . . .	L Near	 01D2	  CODES	
+  MODEL3 . . . . . . . . . . . .	L Near	 01E8	  CODES	
+  MODEL4 . . . . . . . . . . . .	L Near	 01FF	  CODES	
+  EXITMAIN . . . . . . . . . . .	L Near	 0216	  CODES	
+  NOT_INSIDE . . . . . . . . . .	L Near	 0231	  CODES	
+  NOT_INSIDE2  . . . . . . . . .	L Near	 0234	  CODES	
+TDELAY . . . . . . . . . . . . .	P Near	 0238	  CODES	Length= 000F Public
+  W1 . . . . . . . . . . . . . .	L Near	 0239	  CODES	
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+MESSAGE_1  . . . . . . . . . . .	Byte	 0000	  DATAS	
+MESSAGE_2  . . . . . . . . . . .	Byte	 0009	  DATAS	
+MESSAGE_3  . . . . . . . . . . .	Byte	 000F	  DATAS	
+MESSAGE_4  . . . . . . . . . . .	Byte	 0016	  DATAS	
+MESSAGE_5  . . . . . . . . . . .	Byte	 001D	  DATAS	
+MESSAGE_6  . . . . . . . . . . .	Byte	 0024	  DATAS	
+MESSAGE_7  . . . . . . . . . . .	Byte	 002B	  DATAS	
+MESSAGE_8  . . . . . . . . . . .	Byte	 0030	  DATAS	
+NEWVIDEO . . . . . . . . . . . .	Byte	 0046	  DATAS	
+OLDVIDEO . . . . . . . . . . . .	Byte	 0045	  DATAS	
+START  . . . . . . . . . . . . .	L Near	 0000	  CODES	
+WHEATHERIN . . . . . . . . . . .	Byte	 0047	  DATAS	
+
+	   0 Warnings
+	   0 Errors

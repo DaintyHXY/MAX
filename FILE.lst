@@ -1,0 +1,191 @@
+Microsoft (R) Macro Assembler Version 6.11		    12/01/16 20:51:08
+tempfile.asm						     Page 1 - 1
+
+
+				FILEWORD MACRO DATA1
+				    MOV BX,OFFSET DATA1
+				    SUB CH,CH
+				    MOV CL,[BX]+1
+				    MOV WORDS,CX 
+				    ENDM
+				    
+				PRINT MACRO DATA2
+				    MOV AH,09H
+				    MOV DX,OFFSET DATA2
+				    INT 21H
+				    ENDM
+
+ 0000				DATAS SEGMENT
+				    ;此处输入数据段代码
+				     ORG 0010H
+ 0010 50 4C 45 41 53 45		MESSAGE DB 'PLEASE ENTER THE NAME OF FILE:',CR,LF,'$'
+       20 45 4E 54 45 52
+       20 54 48 45 20 4E
+       41 4D 45 20 4F 46
+       20 46 49 4C 45 3A
+       0D 0A 24
+ 0031 0D 0A 50 4C 45 41		MESSAGE2 DB CR,LF,'PLEASE ENTER THE CONTENT:',CR,LF,'$'   
+       53 45 20 45 4E 54
+       45 52 20 54 48 45
+       20 43 4F 4E 54 45
+       4E 54 3A 0D 0A 24
+ 004F 0A 00			ADDRESS DB 10,?,10 DUP(00)
+       000A [
+        00
+       ]
+ 005B 00			LONG    DB ?
+ 005C 64 00			BUF     DB 100,?,100 DUP(00)
+       0064 [
+        00
+       ]
+ 00C2 0A 45 52 52 4F 52		EMESSAGE DB 0AH,'ERROR!','$'
+       21 24
+ 00CA 0A 53 55 43 43 45		SMESSAGE DB 0AH,'SUCCESS!','$'
+       53 53 21 24
+ 00D4 0000			HANDLE DW ?
+ 00D6 0000			WORDS  DW ?
+ = 000D				CR EQU 0DH
+ = 000A				LF EQU 0AH
+ 00D8				DATAS ENDS
+
+ 0000				STACKS SEGMENT
+				    ;此处输入堆栈段代码
+ 0000				STACKS ENDS
+
+ 0000				CODES SEGMENT
+				    ASSUME CS:CODES,DS:DATAS,SS:STACKS
+ 0000				START:
+ 0000				MAIN PROC FAR
+ 0000  B8 ---- R		    MOV AX,DATAS
+ 0003  8E D8			    MOV DS,AX
+				    ;此处输入代码段代码
+				   
+				    ;输入文件标题
+				    PRINT MESSAGE
+ 0005  B4 09		     1	    MOV AH,09H
+ 0007  BA 0010 R	     1	    MOV DX,OFFSET MESSAGE
+ 000A  CD 21		     1	    INT 21H
+ 000C  B4 0A			    MOV AH,0AH
+ 000E  BA 004F R		    MOV DX,OFFSET ADDRESS
+ 0011  CD 21			    INT 21H
+				    
+				    ;将输入缓冲区中的0DH换为00H
+				    FILEWORD ADDRESS
+ 0013  BB 004F R	     1	    MOV BX,OFFSET ADDRESS
+ 0016  2A ED		     1	    SUB CH,CH
+ 0018  8A 4F 01		     1	    MOV CL,[BX]+1
+ 001B  89 0E 00D6 R	     1	    MOV WORDS,CX 
+ 001F  2A ED			    SUB CH,CH
+ 0021  8B F1			    MOV SI,CX
+ 0023  C6 40 02 00		    MOV BYTE PTR[BX+SI]+2,00
+				    
+				    ;获取文件名到00处结束，新建文件
+ 0027  BA 004F R		    MOV DX,OFFSET ADDRESS
+ 002A  42			    INC DX
+ 002B  42			    INC DX
+ 002C  B9 0000			    MOV CX,0
+ 002F  B4 3C			    MOV AH,3CH
+ 0031  CD 21			    INT 21H
+ 0033  72 43			    JC ERROR
+ 0035  A3 00D4 R		    MOV HANDLE,AX
+				    
+				    ;输入文件内容
+				    PRINT MESSAGE2
+ 0038  B4 09		     1	    MOV AH,09H
+ 003A  BA 0031 R	     1	    MOV DX,OFFSET MESSAGE2
+ 003D  CD 21		     1	    INT 21H
+ 003F  B4 0A			    MOV AH,0AH
+ 0041  BA 005C R		    MOV DX,OFFSET BUF
+ 0044  CD 21			    INT 21H
+				    
+				    ;获取输入内容字数
+				    FILEWORD BUF
+ 0046  BB 005C R	     1	    MOV BX,OFFSET BUF
+ 0049  2A ED		     1	    SUB CH,CH
+ 004B  8A 4F 01		     1	    MOV CL,[BX]+1
+ 004E  89 0E 00D6 R	     1	    MOV WORDS,CX 
+ 0052  8B 1E 00D4 R		    MOV BX,HANDLE
+ 0056  8B 0E 00D6 R		    MOV CX,WORDS
+ 005A  BA 005C R		    MOV DX,OFFSET BUF
+ 005D  42			    INC DX
+ 005E  42			    INC DX
+ 005F  B4 40			    MOV AH,40H
+ 0061  CD 21			    INT 21H
+ 0063  72 13			    JC ERROR
+				    
+				    ;关闭文件
+ 0065  8B 1E 00D4 R		    MOV BX,HANDLE
+ 0069  B4 3E			    MOV AH,3EH
+ 006B  CD 21			    INT 21H
+ 006D  72 09			    JC ERROR
+				    PRINT SMESSAGE
+ 006F  B4 09		     1	    MOV AH,09H
+ 0071  BA 00CA R	     1	    MOV DX,OFFSET SMESSAGE
+ 0074  CD 21		     1	    INT 21H
+ 0076  EB 07			    JMP END1
+ 0078				ERROR:
+				    PRINT EMESSAGE
+ 0078  B4 09		     1	    MOV AH,09H
+ 007A  BA 00C2 R	     1	    MOV DX,OFFSET EMESSAGE
+ 007D  CD 21		     1	    INT 21H
+ 007F				END1:
+ 007F  B4 4C			    MOV AH,4CH
+ 0081  CD 21			    INT 21H
+				    
+ 0083				MAIN ENDP
+				   
+ 0083				CODES ENDS
+				    END START
+
+
+Microsoft (R) Macro Assembler Version 6.11		    12/01/16 20:51:08
+tempfile.asm						     Symbols 2 - 1
+
+
+
+
+Macros:
+
+                N a m e                 Type
+
+FILEWORD . . . . . . . . . . . .	Proc
+PRINT  . . . . . . . . . . . . .	Proc
+
+
+Segments and Groups:
+
+                N a m e                 Size     Length   Align   Combine Class
+
+CODES  . . . . . . . . . . . . .	16 Bit	 0083	  Para	  Private 
+DATAS  . . . . . . . . . . . . .	16 Bit	 00D8	  Para	  Private 
+STACKS . . . . . . . . . . . . .	16 Bit	 0000	  Para	  Private 
+
+
+Procedures,  parameters and locals:
+
+                N a m e                 Type     Value    Attr
+
+MAIN . . . . . . . . . . . . . .	P Far	 0000	  CODES	Length= 0083 Public
+  ERROR  . . . . . . . . . . . .	L Near	 0078	  CODES	
+  END1 . . . . . . . . . . . . .	L Near	 007F	  CODES	
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+ADDRESS  . . . . . . . . . . . .	Byte	 004F	  DATAS	
+BUF  . . . . . . . . . . . . . .	Byte	 005C	  DATAS	
+CR . . . . . . . . . . . . . . .	Number	 000Dh	 
+EMESSAGE . . . . . . . . . . . .	Byte	 00C2	  DATAS	
+HANDLE . . . . . . . . . . . . .	Word	 00D4	  DATAS	
+LF . . . . . . . . . . . . . . .	Number	 000Ah	 
+LONG . . . . . . . . . . . . . .	Byte	 005B	  DATAS	
+MESSAGE2 . . . . . . . . . . . .	Byte	 0031	  DATAS	
+MESSAGE  . . . . . . . . . . . .	Byte	 0010	  DATAS	
+SMESSAGE . . . . . . . . . . . .	Byte	 00CA	  DATAS	
+START  . . . . . . . . . . . . .	L Near	 0000	  CODES	
+WORDS  . . . . . . . . . . . . .	Word	 00D6	  DATAS	
+
+	   0 Warnings
+	   0 Errors

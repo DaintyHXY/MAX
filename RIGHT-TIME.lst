@@ -1,0 +1,336 @@
+Microsoft (R) Macro Assembler Version 6.11		    11/29/16 23:01:43
+tempfile.asm						     Page 1 - 1
+
+
+ 0000				DATAS SEGMENT
+				    ;此处输入数据段代码 
+ 0000 00			RIGHT DB ?
+ 0001 00			LEFT  DB ? 
+ 0002  0007 [			LOGO  DB 7 DUP(?)
+        00
+       ]
+ 0009 00			LOGOLOCAL DB ?
+ 000A 00			ZLOCALH DB ?
+ 000B 00			ZLOCALL DB ?
+ 000C 00			CNT   DB ?
+ 000D 00			CNT2  DB ?
+ 000E 00			SCORE DB ?
+ 000F 53 43 4F 52 45 3A		TEXT DB 'SCORE:','$'
+       24
+ 0016 54 49 4D 45 3A 24		TEXT2 DB 'TIME:','$'
+ 001C 30 30 3A 30 30 3A		TIME DB '00:00:00','$'
+       30 30 24
+ 0025 00			ZERO DB 0
+ 0026  0008 [			DBUFFER DB 8 DUP (':'),'$'
+        3A
+       ] 24
+ 002F  0008 [			DBUFFER2 DB 8 DUP (':'),'$'
+        3A
+       ] 24
+ 0038				DATAS ENDS
+
+ 0000				STACKS SEGMENT
+				    ;此处输入堆栈段代码
+ 0000				STACKS ENDS
+
+				BCDASC MACRO DBUFFERs ;时间数值转换成ASCII码字符子程序
+				PUSH BX
+				PUSH AX
+				CBW
+				MOV BL,10
+				DIV BL
+				ADD AL,'0'
+				MOV DBUFFERs[SI],AL
+				INC SI
+				ADD AH,'0'
+				MOV DBUFFERs[SI],AH
+				INC SI
+				POP AX
+				POP BX
+				ENDM
+
+
+ 0000				CODES SEGMENT
+				    ASSUME CS:CODES,DS:DATAS,SS:STACKS
+ 0000				START:
+ 0000				MAIN PROC FAR
+ 0000  B8 ---- R		    MOV AX,DATAS
+ 0003  8E D8			    MOV DS,AX
+				    ;此处输入代码段代码
+				    ;设置时间位置
+ 0005  B4 02			    MOV AH,02
+ 0007  B7 00			    MOV BH,00
+ 0009  B2 00			    MOV DL,00
+ 000B  B6 00			    MOV DH,00
+ 000D  CD 10			    INT 10H
+ 000F  B4 09			    MOV AH,09
+ 0011  BA 0016 R		    MOV DX,OFFSET TEXT2
+ 0014  CD 21			    INT 21H
+ 0016  B4 20			    MOV AH,2C
+ 0018  CD 21			    INT 21H
+				    
+				    ;设置分数位置
+ 001A  B4 02			    MOV AH,02
+ 001C  B7 00			    MOV BH,00
+ 001E  B2 32			    MOV DL,50
+ 0020  B6 00			    MOV DH,00
+ 0022  CD 10			    INT 10H
+ 0024  B4 09			    MOV AH,09
+ 0026  BA 000F R		    MOV DX,OFFSET TEXT
+ 0029  CD 21			    INT 21H
+				    ;设置射击目标
+ 002B  B9 0007			    MOV CX,7
+ 002E  B4 02			    MOV AH,02
+ 0030  B7 00			    MOV BH,00
+ 0032  B2 14			    MOV DL,20
+ 0034  B6 0A			    MOV DH,10
+ 0036  CD 10			    INT 10H
+ 0038  BE 0002 R		    MOV SI,OFFSET LOGO
+ 003B				SET:
+ 003B  88 14			    MOV [SI],DL
+ 003D  88 16 0009 R		    MOV LOGOLOCAL,DL
+ 0041  B4 02			    MOV AH,02
+ 0043  B2 06			    MOV DL,06H
+ 0045  CD 21			    INT 21H
+ 0047  FE 06 0009 R		    INC LOGOLOCAL
+ 004B  46			    INC SI
+ 004C  8A 16 0009 R		    MOV DL,LOGOLOCAL
+ 0050  49			    DEC CX
+ 0051  75 E8			    JNZ SET
+				    
+				    ;设置光标位置
+ 0053  B4 02			    MOV AH,02
+ 0055  B7 00			    MOV BH,00
+ 0057  B2 00			    MOV DL,00
+ 0059  88 16 0000 R		    MOV RIGHT,DL
+ 005D  B6 14			    MOV DH,20
+ 005F  CD 10			    INT 10H
+				    
+				    ;设置子弹发射点位置
+ 0061  B4 02			    MOV AH,02
+ 0063  B2 06			    MOV DL,06H
+ 0065  CD 21			    INT 21H
+				    
+ 0067  B4 02			    MOV AH,02
+ 0069  B7 00			    MOV BH,00
+ 006B  B2 00			    MOV DL,00
+ 006D  B6 14			    MOV DH,20
+ 006F  CD 10			    INT 10H
+				    ;实现发射点移动
+ 0071				AGAIN:
+
+ 0071  B4 01			    MOV AH,01H
+ 0073  CD 16			    INT 16H
+ 0075  74 FA			    JZ AGAIN
+ 0077  B4 00			    MOV AH,0
+ 0079  CD 16			    INT 16H
+ 007B  3C 45			    CMP AL,'E'
+ 007D  75 03 E9 00BB		    JE EXIT
+ 0082  3C 20			    CMP AL,' '
+ 0084  74 5A			    JE LAUNCH
+				    
+ 0086				MOVLF:
+ 0086  80 FC 4B			    CMP AH,4BH
+ 0089  75 2A			    JNE MOVRG
+ 008B  88 16 0001 R		    MOV LEFT,DL
+ 008F  B4 02			    MOV AH,02H
+ 0091  B2 20			    MOV DL,' '
+ 0093  CD 21			    INT 21H
+ 0095  FE 0E 0001 R		    DEC LEFT
+ 0099  8A 16 0001 R		    MOV DL,LEFT
+ 009D  B4 02			    MOV AH,02
+ 009F  CD 10			    INT 10H
+ 00A1  B4 02			    MOV AH,02
+ 00A3  CD 10			    INT 10H
+ 00A5  B4 02			    MOV AH,02
+ 00A7  B2 06			    MOV DL,06H
+ 00A9  CD 21			    INT 21H
+ 00AB  8A 16 0001 R		    MOV DL,LEFT
+ 00AF  B4 02			    MOV AH,02
+ 00B1  CD 10			    INT 10H
+ 00B3  EB BC			    JMP AGAIN
+ 00B5				MOVRG:
+ 00B5  80 FC 4D			    CMP AH,4DH
+ 00B8  75 B7			    JNE AGAIN
+ 00BA  88 16 0000 R		    MOV RIGHT,DL
+ 00BE  B4 02			    MOV AH,02H
+ 00C0  B2 20			    MOV DL,' '
+ 00C2  CD 21			    INT 21H
+ 00C4  FE 06 0000 R		    INC RIGHT
+ 00C8  8A 16 0000 R		    MOV DL,RIGHT
+ 00CC  B4 02			    MOV AH,02H
+ 00CE  CD 10			    INT 10H
+ 00D0  B4 02			    MOV AH,02
+ 00D2  B2 06			    MOV DL,06H
+ 00D4  CD 21			    INT 21H
+ 00D6  8A 16 0000 R		    MOV DL,RIGHT
+ 00DA  B4 02			    MOV AH,02
+ 00DC  CD 10			    INT 10H
+ 00DE  EB 91			    JMP AGAIN
+
+ 00E0				LAUNCH:
+ 00E0  C6 06 000C R 05		    MOV CNT,5
+ 00E5				LAUNCHMV:    
+ 00E5  88 36 000A R		    MOV ZLOCALH,DH
+ 00E9  88 16 000B R		    MOV ZLOCALL,DL
+ 00ED  FE 0E 000A R		    DEC ZLOCALH
+ 00F1  FE 0E 000A R		    DEC ZLOCALH
+ 00F5  E8 0049			    CALL TDELAY
+ 00F8  8A 36 000A R		    MOV DH,ZLOCALH
+ 00FC  B4 02			    MOV AH,02
+ 00FE  CD 10			    INT 10H
+ 0100  B4 02			    MOV AH,02
+ 0102  B2 41			    MOV DL,'A'
+ 0104  CD 21			    INT 21H
+ 0106  8A 16 000B R		    MOV DL,ZLOCALL
+ 010A  B4 02			    MOV AH,02
+ 010C  CD 10			    INT 10H
+ 010E  E8 0030			    CALL TDELAY
+ 0111  8A 36 000A R		    MOV DH,ZLOCALH
+ 0115  B4 02			    MOV AH,02
+ 0117  CD 10			    INT 10H
+ 0119  B4 02			    MOV AH,02
+ 011B  B2 20			    MOV DL,' '
+ 011D  CD 21			    INT 21H
+ 011F  8A 16 000B R		    MOV DL,ZLOCALL
+ 0123  B4 02			    MOV AH,02
+ 0125  CD 10			    INT 10H
+ 0127  FE 0E 000C R		    DEC CNT
+ 012B  75 B8			    JNZ LAUNCHMV
+ 012D  E8 0020			    CALL JUDGE
+				    
+ 0130  B4 02			    MOV AH,02
+ 0132  B6 14			    MOV DH,20
+ 0134  8A 16 000B R		    MOV DL,ZLOCALL
+ 0138  CD 10			    INT 10H
+ 013A  E9 FF34			    JMP AGAIN
+				    
+
+				    
+ 013D				EXIT:
+ 013D  B4 4C			    MOV AH,4CH
+ 013F  CD 21			    INT 21H
+				    
+ 0141				    MAIN ENDP
+				    ;-------------
+ 0141				TDELAY PROC NEAR
+ 0141  50			    PUSH AX
+ 0142				W1:
+ 0142  E4 61			    IN AL,61H
+ 0144  24 10			    AND AL,00010000B
+ 0146  38 E0			    CMP AL,AH
+ 0148  74 F8			    JE W1
+ 014A  8A E0			    MOV AH,AL
+ 014C  E2 F4			    LOOP W1
+ 014E  58			    POP AX
+ 014F  C3			    RET
+ 0150				    TDELAY ENDP
+
+ 0150				JUDGE PROC NEAR
+ 0150  BE 0002 R		    MOV SI,OFFSET LOGO
+ 0153  C6 06 000D R 07		    MOV CNT2,7
+ 0158  B4 03			    MOV AH,03
+ 015A  B7 00			    MOV BH,00
+ 015C  CD 10			    INT 10H
+ 015E				CSCORE:
+ 015E  3A 14			    CMP DL,[SI]
+ 0160  74 09			    JE  GSCORE
+ 0162  46			    INC SI
+ 0163  FE 0E 000D R		    DEC CNT2
+ 0167  75 F5			    JNZ CSCORE
+ 0169  EB 1F			    JMP EXIT2
+ 016B				GSCORE:
+ 016B  B7 00			    MOV BH,0
+ 016D  88 3C			    MOV [SI],BH
+ 016F  FE 06 000E R		    INC SCORE
+ 0173  B4 02			    MOV AH,02
+ 0175  B7 00			    MOV BH,00
+ 0177  B2 38			    MOV DL,56
+ 0179  B6 00			    MOV DH,00
+ 017B  CD 10			    INT 10H
+ 017D  80 0E 000E R 30		    OR  SCORE,30H
+ 0182  B4 02			    MOV AH,02
+ 0184  8A 16 000E R		    MOV DL,SCORE
+ 0188  CD 21			    INT 21H
+ 018A				EXIT2:
+ 018A  C3			    RET
+ 018B				    JUDGE ENDP
+				    
+				       
+ 018B				CODES ENDS
+				      END START
+
+
+
+
+
+
+
+
+
+
+Microsoft (R) Macro Assembler Version 6.11		    11/29/16 23:01:43
+tempfile.asm						     Symbols 2 - 1
+
+
+
+
+Macros:
+
+                N a m e                 Type
+
+BCDASC . . . . . . . . . . . . .	Proc
+
+
+Segments and Groups:
+
+                N a m e                 Size     Length   Align   Combine Class
+
+CODES  . . . . . . . . . . . . .	16 Bit	 018B	  Para	  Private 
+DATAS  . . . . . . . . . . . . .	16 Bit	 0038	  Para	  Private 
+STACKS . . . . . . . . . . . . .	16 Bit	 0000	  Para	  Private 
+
+
+Procedures,  parameters and locals:
+
+                N a m e                 Type     Value    Attr
+
+JUDGE  . . . . . . . . . . . . .	P Near	 0150	  CODES	Length= 003B Public
+  CSCORE . . . . . . . . . . . .	L Near	 015E	  CODES	
+  GSCORE . . . . . . . . . . . .	L Near	 016B	  CODES	
+  EXIT2  . . . . . . . . . . . .	L Near	 018A	  CODES	
+MAIN . . . . . . . . . . . . . .	P Far	 0000	  CODES	Length= 0141 Public
+  SET  . . . . . . . . . . . . .	L Near	 003B	  CODES	
+  AGAIN  . . . . . . . . . . . .	L Near	 0071	  CODES	
+  MOVLF  . . . . . . . . . . . .	L Near	 0086	  CODES	
+  MOVRG  . . . . . . . . . . . .	L Near	 00B5	  CODES	
+  LAUNCH . . . . . . . . . . . .	L Near	 00E0	  CODES	
+  LAUNCHMV . . . . . . . . . . .	L Near	 00E5	  CODES	
+  EXIT . . . . . . . . . . . . .	L Near	 013D	  CODES	
+TDELAY . . . . . . . . . . . . .	P Near	 0141	  CODES	Length= 000F Public
+  W1 . . . . . . . . . . . . . .	L Near	 0142	  CODES	
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+CNT2 . . . . . . . . . . . . . .	Byte	 000D	  DATAS	
+CNT  . . . . . . . . . . . . . .	Byte	 000C	  DATAS	
+DBUFFER2 . . . . . . . . . . . .	Byte	 002F	  DATAS	
+DBUFFER  . . . . . . . . . . . .	Byte	 0026	  DATAS	
+LEFT . . . . . . . . . . . . . .	Byte	 0001	  DATAS	
+LOGOLOCAL  . . . . . . . . . . .	Byte	 0009	  DATAS	
+LOGO . . . . . . . . . . . . . .	Byte	 0002	  DATAS	
+RIGHT  . . . . . . . . . . . . .	Byte	 0000	  DATAS	
+SCORE  . . . . . . . . . . . . .	Byte	 000E	  DATAS	
+START  . . . . . . . . . . . . .	L Near	 0000	  CODES	
+TEXT2  . . . . . . . . . . . . .	Byte	 0016	  DATAS	
+TEXT . . . . . . . . . . . . . .	Byte	 000F	  DATAS	
+TIME . . . . . . . . . . . . . .	Byte	 001C	  DATAS	
+ZERO . . . . . . . . . . . . . .	Byte	 0025	  DATAS	
+ZLOCALH  . . . . . . . . . . . .	Byte	 000A	  DATAS	
+ZLOCALL  . . . . . . . . . . . .	Byte	 000B	  DATAS	
+
+	   0 Warnings
+	   0 Errors
