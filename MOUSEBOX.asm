@@ -27,7 +27,7 @@ AGAIN:
        JNE START1
        ENDM
 
-MACRO CLEARSRC 
+CLEARSRC MACRO
     MOV AX,0600H           ;清除屏幕
     MOV BH,07
     MOV CX,0
@@ -35,7 +35,7 @@ MACRO CLEARSRC
     INT 10H
     ENDM      
 
-MACRO FRAME ROW_START,COL_START,ROW_END,COL_END,COLOR
+FRAME MACRO ROW_START,COL_START,ROW_END,COL_END,COLOR ;画出矩形框
       LOCAL ROWCOL1,ROWCOL2,ROWCOL3,ROWCOL4
       MOV DX,ROW_START
       MOV CX,COL_START
@@ -73,7 +73,7 @@ ROWCOL4:
       MOV AL,COLOR
       INT 10H
       INC DX
-      CMP DX,ROL_END
+      CMP DX,ROW_END
       JNE ROWCOL4       
       
       ENDM
@@ -92,6 +92,13 @@ MESSAGE_8 DB 'PRESS ENTER TO ENTER','$'
 OLDVIDEO  DB ?
 NEWVIDEO  DB 12H
 WHEATHERIN DB ?
+
+TITLETEXT DB 'TITLE:','$'
+CONTEXTTEXT DB 'CONTEXT:','$'
+SAVETEXT DB 'SAVE','$'
+BACKTEXT DB 'BACK','$'
+SMESSAGE DB 'SUCCESS','$'
+
 DATAS ENDS
 
 STACKS SEGMENT
@@ -190,7 +197,9 @@ BACK2:
     JA  MODEL2
     CMP DX,80
     JA  MODEL2           ;判断是否在模块一中
+    CLEARSRC
     CALL MODEL1
+    JMP SECONDPAINT
 MODEL2:   
     CMP CX,50
     JB  MODEL3
@@ -257,20 +266,83 @@ TDELAY ENDP
 
 MODEL1 PROC NEAR
      
-     CLEARP               ;清除屏幕
+     CLEARSRC               ;清除屏幕
      MOV AH,00            ;设置视频模式
      MOV AL,NEWVIDEO
      INT 10H
      
+     CURSOR 0,0
+     FRAME 70,130,110,550,4
+     FRAME 150,130,400,550,4
+     FRAME 420,150,450,250,4
+     FRAME 420,430,450,530,4
      
-   
+     CURSOR 5,10
+     DISPLAY TITLETEXT
+     CURSOR 10,8
+     DISPLAY CONTEXTTEXT
+     CURSOR 27,23
+     DISPLAY SAVETEXT
+     CURSOR 27,58
+     DISPLAY BACKTEXT
+     
+     MOV AX,0000H      ;初始化鼠标
+     INT 33H
+     
+NEWBACK:
+     MOV AX,01H
+     INT 33H           ;检查鼠标光标
+     MOV AX,03H        ;检查是否按下鼠标
+     INT 33H
+     CMP BX,0001H      ;现在在cx=列dx=行的位置
+     JNE NEWBACK       ;检查左键是否按下
+     CMP DX,70
+     JB  NEWBACK2
+     CMP DX,110
+     JA  NEWBACK2
+     CMP CX,130
+     JB  NEWBACK2
+     CMP CX,550
+     JA  NEWBACK2
 
+NEWBACK2:     
+     CMP DX,150
+     JB  NEWBACK3
+     CMP DX,400
+     JA  NEWBACK3
+     CMP CX,130
+     JB  NEWBACK3
+     CMP CX,550
+     JA  NEWBACK3
+
+NEWBACK3:     
+     CMP DX,420
+     JB  NEWBACK4
+     CMP DX,450
+     JA  NEWBACK4
+     CMP CX,150
+     JB  NEWBACK4
+     CMP CX,250
+     JA  NEWBACK4
+     
+NEWBACK4:
+     CMP DX,420
+     JB  NEWBACK
+     CMP DX,450
+     JA  NEWBACK
+     CMP CX,430
+     JB  NEWBACK
+     CMP CX,450
+     JA  NEWBACK
+     RET
 MODEL1 ENDP
 
 
 
 CODES ENDS
     END START
+
+
 
 
 
