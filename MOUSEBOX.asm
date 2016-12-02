@@ -77,10 +77,20 @@ ROWCOL4:
       JNE ROWCOL4       
       
       ENDM
+
+FILEWORD MACRO DATA1
+      MOV BX,OFFSET DATA1
+      SUB CH,CH
+      MOV CL,[BX]+1
+      MOV WORDS,CX
+      ENDM
              
 
 DATAS SEGMENT
     ;此处输入数据段代码 
+CR EQU 0DH
+LF EQU 0AH    
+    
 MESSAGE_1 DB 'Welcome!','$'
 MESSAGE_2 DB 'ENTER','$'
 MESSAGE_3 DB 'MODEL1','$'
@@ -98,6 +108,15 @@ CONTEXTTEXT DB 'CONTEXT:','$'
 SAVETEXT DB 'SAVE','$'
 BACKTEXT DB 'BACK','$'
 SMESSAGE DB 'SUCCESS','$'
+TITLEMESSAGE DB 'PLEASE ENTER THE NAME OF FILE','$'
+CONTEXTMESSAGE DB 'PLEASE ENTER THE CONTENT','$'
+ADDRESS DB 10,?,10 DUP(00)
+BUF     DB 100,?,100 DUP(00)
+LONG DB ?
+HANDLE DW ?
+WORDS  DW ?
+ERRORTIMES DB 0
+ERRORMESSAGE DB 'ERROR!PLEASE TRY AGAIN!','$'
 
 DATAS ENDS
 
@@ -198,6 +217,8 @@ BACK2:
     CMP DX,80
     JA  MODEL2           ;判断是否在模块一中
     CLEARSRC
+    MOV CX,33144
+    CALL TDELAY
     CALL MODEL1
     JMP SECONDPAINT
 MODEL2:   
@@ -286,6 +307,7 @@ MODEL1 PROC NEAR
      CURSOR 27,58
      DISPLAY BACKTEXT
      
+     CURSOR 0,0
      MOV AX,0000H      ;初始化鼠标
      INT 33H
      
@@ -304,7 +326,29 @@ NEWBACK:
      JB  NEWBACK2
      CMP CX,550
      JA  NEWBACK2
-
+     
+     CURSOR 0,0
+     DISPLAY TITLEMESSAGE
+     ;获取标题
+     MOV AH,0AH
+     MOV DX,OFFSET ADDRESS
+     INT 21H                  
+     ;将输入缓冲区中的0DH换为00H
+     FILEWORD ADDRESS
+     SUB CH,CH
+     MOV SI,CX
+     MOV BYTE PTR[BX+SI]+2,00
+     ;获取文件名到00结束，新建文件
+     MOV DX,OFFSET ADDRESS
+     INC DX
+     INC DX
+     MOV CX,0
+     MOV AH,3CH
+     INT 21H
+     JC  ERROR
+     MOV HANDLE,AX
+     JMP NEWBACK
+          
 NEWBACK2:     
      CMP DX,150
      JB  NEWBACK3
@@ -314,6 +358,31 @@ NEWBACK2:
      JB  NEWBACK3
      CMP CX,550
      JA  NEWBACK3
+     
+     CURSOR 10,10
+     DISPLAY CONTEXTMESSAGE
+     ;输入文件内容
+     MOV AH,0AH
+     MOV DX,OFFSET BUF
+     INT 21H
+     
+     ;获取输入内容字数
+     FILEWORD BUF
+     MOV BX,HANDLE
+     MOV CX,WORDS
+     MOV DX,OFFSET BUF
+     INC DX
+     INC DX
+     MOV AH,40H
+     INT 21H
+     JC ERROR
+     
+     ;关闭文件
+     MOV BX,HANDLE
+     MOV AH,3EH
+     INT 21H
+     JC ERROR
+     JMP NEWBACK
 
 NEWBACK3:     
      CMP DX,420
@@ -324,6 +393,28 @@ NEWBACK3:
      JB  NEWBACK4
      CMP CX,250
      JA  NEWBACK4
+     CMP ERRORTIMES,0
+     JA  ERRORM
+     CURSOR 20,20
+     DISPLAY SMESSAGE
+     JMP NEWNEXT
+ERROR:
+     INC ERRORMESSAGE
+     JMP NEWBACK     
+ERRORM:
+     CURSOR 20,20
+     DISPLAY ERRORMESSAGE
+NEWNEXT:
+     MOV CX,33144
+     CALL TDELAY
+     MOV AX,0600H
+     MOV BH,0
+     MOV CX,2020H
+     MOV DX,2330H
+     INT 10H
+     JMP NEWBACK
+     
+     
      
 NEWBACK4:
      CMP DX,420
@@ -341,6 +432,7 @@ MODEL1 ENDP
 
 CODES ENDS
     END START
+
 
 
 
