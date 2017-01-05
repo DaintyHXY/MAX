@@ -58,7 +58,7 @@ MAIN PROC FAR
     MOV CX,0
     MOV AH,3CH
     INT 21H
-    JC ERROR
+    JC ERROR2
     MOV HANDLE,AX
     
     ;输入文件内容
@@ -76,17 +76,33 @@ MAIN PROC FAR
     INC DX
     MOV AH,40H
     INT 21H
-    JC ERROR
+    JC ERROR2
     
     ;关闭文件
     MOV BX,HANDLE
     MOV AH,3EH
     INT 21H
-    JC ERROR
+    JC ERROR2
+    PRINT SMESSAGE
+
+
+    
+    
+    ;删除文件
+    MOV DX,OFFSET ADDRESS
+    INC DX
+    INC DX
+    MOV AH,41H
+    INT 21H
+    JC  ERROR2
     PRINT SMESSAGE
     JMP END1
-ERROR:
+ 
+ERROR2:
     PRINT EMESSAGE
+    
+    
+    
 END1:
     MOV AH,4CH
     INT 21H
@@ -95,5 +111,6 @@ MAIN ENDP
    
 CODES ENDS
     END START
+
 
 

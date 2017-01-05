@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 6.11		    01/05/17 15:15:25
+Microsoft (R) Macro Assembler Version 6.11		    01/05/17 16:34:07
 tempfile.asm						     Page 1 - 1
 
 
@@ -86,7 +86,7 @@ tempfile.asm						     Page 1 - 1
  002C  B9 0000			    MOV CX,0
  002F  B4 3C			    MOV AH,3CH
  0031  CD 21			    INT 21H
- 0033  72 43			    JC ERROR
+ 0033  72 55			    JC ERROR2
  0035  A3 00D4 R		    MOV HANDLE,AX
 				    
 				    ;输入文件内容
@@ -111,35 +111,54 @@ tempfile.asm						     Page 1 - 1
  005E  42			    INC DX
  005F  B4 40			    MOV AH,40H
  0061  CD 21			    INT 21H
- 0063  72 13			    JC ERROR
+ 0063  72 25			    JC ERROR2
 				    
 				    ;关闭文件
  0065  8B 1E 00D4 R		    MOV BX,HANDLE
  0069  B4 3E			    MOV AH,3EH
  006B  CD 21			    INT 21H
- 006D  72 09			    JC ERROR
+ 006D  72 1B			    JC ERROR2
 				    PRINT SMESSAGE
  006F  B4 09		     1	    MOV AH,09H
  0071  BA 00CA R	     1	    MOV DX,OFFSET SMESSAGE
  0074  CD 21		     1	    INT 21H
- 0076  EB 07			    JMP END1
- 0078				ERROR:
-				    PRINT EMESSAGE
- 0078  B4 09		     1	    MOV AH,09H
- 007A  BA 00C2 R	     1	    MOV DX,OFFSET EMESSAGE
- 007D  CD 21		     1	    INT 21H
- 007F				END1:
- 007F  B4 4C			    MOV AH,4CH
- 0081  CD 21			    INT 21H
+
+
 				    
- 0083				MAIN ENDP
+				    
+				    ;删除文件
+ 0076  BA 004F R		    MOV DX,OFFSET ADDRESS
+ 0079  42			    INC DX
+ 007A  42			    INC DX
+ 007B  B4 41			    MOV AH,41H
+ 007D  CD 21			    INT 21H
+ 007F  72 09			    JC  ERROR2
+				    PRINT SMESSAGE
+ 0081  B4 09		     1	    MOV AH,09H
+ 0083  BA 00CA R	     1	    MOV DX,OFFSET SMESSAGE
+ 0086  CD 21		     1	    INT 21H
+ 0088  EB 07			    JMP END1
+				 
+ 008A				ERROR2:
+				    PRINT EMESSAGE
+ 008A  B4 09		     1	    MOV AH,09H
+ 008C  BA 00C2 R	     1	    MOV DX,OFFSET EMESSAGE
+ 008F  CD 21		     1	    INT 21H
+				    
+				    
+				    
+ 0091				END1:
+ 0091  B4 4C			    MOV AH,4CH
+ 0093  CD 21			    INT 21H
+				    
+ 0095				MAIN ENDP
 				   
- 0083				CODES ENDS
+ 0095				CODES ENDS
 				    END START
 
 
 
-Microsoft (R) Macro Assembler Version 6.11		    01/05/17 15:15:25
+Microsoft (R) Macro Assembler Version 6.11		    01/05/17 16:34:07
 tempfile.asm						     Symbols 2 - 1
 
 
@@ -157,7 +176,7 @@ Segments and Groups:
 
                 N a m e                 Size     Length   Align   Combine Class
 
-CODES  . . . . . . . . . . . . .	16 Bit	 0083	  Para	  Private 
+CODES  . . . . . . . . . . . . .	16 Bit	 0095	  Para	  Private 
 DATAS  . . . . . . . . . . . . .	16 Bit	 00D8	  Para	  Private 
 STACKS . . . . . . . . . . . . .	16 Bit	 0000	  Para	  Private 
 
@@ -166,9 +185,9 @@ Procedures,  parameters and locals:
 
                 N a m e                 Type     Value    Attr
 
-MAIN . . . . . . . . . . . . . .	P Far	 0000	  CODES	Length= 0083 Public
-  ERROR  . . . . . . . . . . . .	L Near	 0078	  CODES	
-  END1 . . . . . . . . . . . . .	L Near	 007F	  CODES	
+MAIN . . . . . . . . . . . . . .	P Far	 0000	  CODES	Length= 0095 Public
+  ERROR2 . . . . . . . . . . . .	L Near	 008A	  CODES	
+  END1 . . . . . . . . . . . . .	L Near	 0091	  CODES	
 
 
 Symbols:
