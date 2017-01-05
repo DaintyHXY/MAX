@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 6.11		    12/02/16 14:29:43
+Microsoft (R) Macro Assembler Version 6.11		    01/05/17 15:58:46
 tempfile.asm						     Page 1 - 1
 
 
@@ -121,36 +121,37 @@ tempfile.asm						     Page 1 - 1
        54 3A 24
  0058 53 41 56 45 24		SAVETEXT DB 'SAVE','$'
  005D 42 41 43 4B 24		BACKTEXT DB 'BACK','$'
- 0062 53 55 43 43 45 53		SMESSAGE DB 'SUCCESS','$'
-       53 24
- 006A 50 4C 45 41 53 45		TITLEMESSAGE DB 'PLEASE ENTER THE NAME OF FILE','$'
+ 0062 53 55 43 43 45 53		SMESSAGE DB 'SUCCESS!','$'
+       53 21 24
+ 006B 50 4C 45 41 53 45		TITLEMESSAGE DB 'PLEASE ENTER THE NAME OF FILE','$'
        20 45 4E 54 45 52
        20 54 48 45 20 4E
        41 4D 45 20 4F 46
        20 46 49 4C 45 24
- 0088 50 4C 45 41 53 45		CONTEXTMESSAGE DB 'PLEASE ENTER THE CONTENT','$'
+ 0089 50 4C 45 41 53 45		CONTEXTMESSAGE DB 'PLEASE ENTER THE CONTENT','$'
        20 45 4E 54 45 52
        20 54 48 45 20 43
        4F 4E 54 45 4E 54
        24
- 00A1 0A 00			ADDRESS DB 10,?,10 DUP(00)
+ 00A2 49 4E 46 4F 3A 24		INFORMATION DB 'INFO:','$'
+ 00A8 0A 00			ADDRESS DB 10,?,10 DUP(00)
        000A [
         00
        ]
- 00AD 64 00			BUF     DB 100,?,100 DUP(00)
+ 00B4 64 00			BUF     DB 100,?,100 DUP(00)
        0064 [
         00
        ]
- 0113 00			LONG DB ?
- 0114 0000			HANDLE DW ?
- 0116 0000			WORDS  DW ?
- 0118 00			ERRORTIMES DB 0
- 0119 45 52 52 4F 52 21		ERRORMESSAGE DB 'ERROR!PLEASE TRY AGAIN!','$'
+ 011A 00			LONG DB ?
+ 011B 0000			HANDLE DW ?
+ 011D 0000			WORDS  DW ?
+ 011F 00			ERRORTIMES DB 0
+ 0120 45 52 52 4F 52 21		ERRORMESSAGE DB 'ERROR!PLEASE TRY AGAIN!','$'
        50 4C 45 41 53 45
        20 54 52 59 20 41
        47 41 49 4E 21 24
 
- 0131				DATAS ENDS
+ 0138				DATAS ENDS
 
  0000				STACKS SEGMENT
 				    ;此处输入堆栈段代码
@@ -165,7 +166,7 @@ tempfile.asm						     Page 1 - 1
 				    ;此处输入代码段代码
  0005				FIRST:
  0005  B9 8178			    MOV CX,33144
- 0008  E8 0246			    CALL TDELAY            ;此处延迟十分重要！！调试时没有这个延迟导致页面生成不对
+ 0008  E8 055A			    CALL TDELAY            ;此处延迟十分重要！！调试时没有这个延迟导致页面生成不对
  000B  B4 0F			    MOV AH,0FH
  000D  CD 10			    INT 10H                ;获得当前视频模式
  000F  A2 0045 R		    MOV OLDVIDEO,AL        ;保存当前视频模式
@@ -237,13 +238,13 @@ tempfile.asm						     Page 1 - 1
  008C  83 FB 01			    CMP BX,0001H     ;现在在cx=列dx=行的位置
  008F  75 F6			    JNE BACK         ;检查左键是否按下
  0091  81 F9 00FA		    CMP CX,250       ;看是否在框的右边
- 0095  73 03 E9 01B0		    JB NOT_INSIDE
+ 0095  73 03 E9 04C4		    JB NOT_INSIDE
  009A  81 F9 015E		    CMP CX,350
- 009E  76 03 E9 01A7		    JA NOT_INSIDE
+ 009E  76 03 E9 04BB		    JA NOT_INSIDE
  00A3  81 FA 0096		    CMP DX,150
- 00A7  73 03 E9 019E		    JB NOT_INSIDE
+ 00A7  73 03 E9 04B2		    JB NOT_INSIDE
  00AC  81 FA 00FA		    CMP DX,250
- 00B0  76 03 E9 0195		    JA NOT_INSIDE     ;检查是否在框中
+ 00B0  76 03 E9 04A9		    JA NOT_INSIDE     ;检查是否在框中
 
  00B5				SECONDPAINT:        
  00B5  B8 0600			    MOV AX,0600H           ;清除屏幕
@@ -393,13 +394,13 @@ tempfile.asm						     Page 1 - 1
  01B8  83 FB 01			    CMP BX,0001H
  01BB  75 F6			    JNE BACK2
  01BD  83 F9 32			    CMP CX,50
- 01C0  72 29			    JB  MODEL2
+ 01C0  72 25			    JB  MODEL2
  01C2  83 FA 1E			    CMP DX,30
- 01C5  72 24			    JB  MODEL2
+ 01C5  72 20			    JB  MODEL2
  01C7  81 F9 00C8		    CMP CX,200
- 01CB  77 1E			    JA  MODEL2
+ 01CB  77 1A			    JA  MODEL2
  01CD  83 FA 50			    CMP DX,80
- 01D0  77 19			    JA  MODEL2           ;判断是否在模块一中
+ 01D0  77 15			    JA  MODEL2           ;判断是否在模块一中
 				    CLEARSRC
  01D2  B8 0600		     1	    MOV AX,0600H           ;清除屏幕
  01D5  B7 07		     1	    MOV BH,07
@@ -407,446 +408,473 @@ tempfile.asm						     Page 1 - 1
  01DA  BA 184F		     1	    MOV DX,184FH
  01DD  CD 10		     1	    INT 10H
  01DF  B9 8178			    MOV CX,33144
- 01E2  E8 006C			    CALL TDELAY
- 01E5  E8 0078			    CALL MODEL1
- 01E8  E9 FECA			    JMP SECONDPAINT
- 01EB				MODEL2:   
- 01EB  83 F9 32			    CMP CX,50
- 01EE  72 11			    JB  MODEL3
- 01F0  83 FA 6E			    CMP DX,110
- 01F3  72 0C			    JB  MODEL3
- 01F5  81 F9 00C8		    CMP CX,200
- 01F9  77 06			    JA  MODEL3
- 01FB  81 FA 00A0		    CMP DX,160
- 01FF  77 00			    JA  MODEL3
+ 01E2  E8 0380			    CALL TDELAY
+ 01E5  EB 6B			    JMP MODEL1
+				    ;JMP SECONDPAINT
+ 01E7				MODEL2:   
+ 01E7  83 F9 32			    CMP CX,50
+ 01EA  72 11			    JB  MODEL3
+ 01EC  83 FA 6E			    CMP DX,110
+ 01EF  72 0C			    JB  MODEL3
+ 01F1  81 F9 00C8		    CMP CX,200
+ 01F5  77 06			    JA  MODEL3
+ 01F7  81 FA 00A0		    CMP DX,160
+ 01FB  77 00			    JA  MODEL3
 				    ;CALL MODEL2               ;判断是否在模块2
- 0201				MODEL3:    
- 0201  83 F9 32			    CMP CX,50
- 0204  72 12			    JB  MODEL4
- 0206  81 FA 00BE		    CMP DX,190
- 020A  72 0C			    JB  MODEL4
- 020C  81 F9 00C8		    CMP CX,200
- 0210  77 06			    JA  MODEL4
- 0212  81 FA 00F0		    CMP DX,240
- 0216  77 00			    JA  MODEL4
+ 01FD				MODEL3:    
+ 01FD  83 F9 32			    CMP CX,50
+ 0200  72 12			    JB  MODEL4
+ 0202  81 FA 00BE		    CMP DX,190
+ 0206  72 0C			    JB  MODEL4
+ 0208  81 F9 00C8		    CMP CX,200
+ 020C  77 06			    JA  MODEL4
+ 020E  81 FA 00F0		    CMP DX,240
+ 0212  77 00			    JA  MODEL4
 				    ;CALL MODEL3                ;判断是否在模块3中
- 0218				MODEL4:    
- 0218  83 F9 32			    CMP CX,50
- 021B  72 12			    JB  EXITMAIN
- 021D  81 FA 010E		    CMP DX,270
- 0221  72 0C			    JB  EXITMAIN
- 0223  81 F9 00C8		    CMP CX,200
- 0227  77 06			    JA  EXITMAIN
- 0229  81 FA 0140		    CMP DX,320
- 022D  77 00			    JA  EXITMAIN
+ 0214				MODEL4:    
+ 0214  83 F9 32			    CMP CX,50
+ 0217  72 12			    JB  EXITMAIN
+ 0219  81 FA 010E		    CMP DX,270
+ 021D  72 0C			    JB  EXITMAIN
+ 021F  81 F9 00C8		    CMP CX,200
+ 0223  77 06			    JA  EXITMAIN
+ 0225  81 FA 0140		    CMP DX,320
+ 0229  77 00			    JA  EXITMAIN
 				    ;CALL MODEL4                 ;判断是否在模块4中
- 022F				EXITMAIN:   
- 022F  81 F9 01F4		    CMP CX,500
- 0233  72 18			    JB  NOT_INSIDE2
- 0235  81 FA 0190		    CMP DX,400
- 0239  72 12			    JB  NOT_INSIDE2
- 023B  81 F9 0258		    CMP CX,600
- 023F  77 0C			    JA  NOT_INSIDE2
- 0241  81 FA 01C2		    CMP DX,450
- 0245  77 06			    JA  NOT_INSIDE2
- 0247  E9 FDBB			    JMP FIRST
-
- 024A				NOT_INSIDE:
- 024A  E9 FE3A			    JMP BACK
+ 022B				EXITMAIN:   
+ 022B  81 F9 01F4		    CMP CX,500
+ 022F  73 03 E9 032D		    JB  NOT_INSIDE2
+ 0234  81 FA 0190		    CMP DX,400
+ 0238  73 03 E9 0324		    JB  NOT_INSIDE2
+ 023D  81 F9 0258		    CMP CX,600
+ 0241  76 03 E9 031B		    JA  NOT_INSIDE2
+ 0246  81 FA 01C2		    CMP DX,450
+ 024A  76 03 E9 0312		    JA  NOT_INSIDE2
+ 024F  E9 FDB3			    JMP FIRST
 				    
- 024D				NOT_INSIDE2:
-				   
- 024D  B4 4C			    MOV AH,4CH
- 024F  CD 21			    INT 21H
- 0251				MAIN ENDP
-
- 0251				TDELAY PROC NEAR
- 0251  50			     PUSH AX
- 0252				W1:  
- 0252  E4 61			     IN  AL,61H
- 0254  24 10			     AND AL,00010000B
- 0256  38 E0			     CMP AL,AH
- 0258  74 F8			     JE  W1
- 025A  8A E0			     MOV AH,AL
- 025C  E2 F4			     LOOP W1
- 025E  58			     POP AX
- 025F  C3			     RET
- 0260				TDELAY ENDP
-
-
- 0260				MODEL1 PROC NEAR
+				 
+ 0252				    MODEL1:
 				     
 				     CLEARSRC               ;清除屏幕
- 0260  B8 0600		     1	    MOV AX,0600H           ;清除屏幕
- 0263  B7 07		     1	    MOV BH,07
- 0265  B9 0000		     1	    MOV CX,0
- 0268  BA 184F		     1	    MOV DX,184FH
- 026B  CD 10		     1	    INT 10H
- 026D  B4 00			     MOV AH,00            ;设置视频模式
- 026F  A0 0046 R		     MOV AL,NEWVIDEO
- 0272  CD 10			     INT 10H
+ 0252  B8 0600		     1	    MOV AX,0600H           ;清除屏幕
+ 0255  B7 07		     1	    MOV BH,07
+ 0257  B9 0000		     1	    MOV CX,0
+ 025A  BA 184F		     1	    MOV DX,184FH
+ 025D  CD 10		     1	    INT 10H
+ 025F  B4 00			     MOV AH,00            ;设置视频模式
+ 0261  A0 0046 R		     MOV AL,NEWVIDEO
+ 0264  CD 10			     INT 10H
 				     
 				     CURSOR 0,0
- 0274  B4 02		     1	       MOV AH,02H
- 0276  B7 00		     1	       MOV BH,00
- 0278  B6 00		     1	       MOV DH,0
- 027A  B2 00		     1	       MOV DL,0  ;设置光标位置
- 027C  CD 10		     1	       INT 10H
+ 0266  B4 02		     1	       MOV AH,02H
+ 0268  B7 00		     1	       MOV BH,00
+ 026A  B6 00		     1	       MOV DH,0
+ 026C  B2 00		     1	       MOV DL,0  ;设置光标位置
+ 026E  CD 10		     1	       INT 10H
 				     FRAME 70,130,110,550,4
- 027E  BA 0046		     1	      MOV DX,70
- 0281  B9 0082		     1	      MOV CX,130
- 0284			     1	??000C:
- 0284  B4 0C		     1	      MOV AH,0CH
- 0286  B0 04		     1	      MOV AL,4
- 0288  CD 10		     1	      INT 10H
- 028A  41		     1	      INC CX
- 028B  81 F9 0226	     1	      CMP CX,550
- 028F  75 F3		     1	      JNE ??000C
- 0291  B9 0082		     1	      MOV CX,130
- 0294			     1	??000D:
- 0294  B4 0C		     1	      MOV AH,0CH
- 0296  B0 04		     1	      MOV AL,4
- 0298  CD 10		     1	      INT 10H
- 029A  42		     1	      INC DX
- 029B  83 FA 6E		     1	      CMP DX,110
- 029E  75 F4		     1	      JNE ??000D
- 02A0  BA 006E		     1	      MOV DX,110
- 02A3  B9 0082		     1	      MOV CX,130
- 02A6			     1	??000E:
- 02A6  B4 0C		     1	      MOV AH,0CH
- 02A8  B0 04		     1	      MOV AL,4
- 02AA  CD 10		     1	      INT 10H
- 02AC  41		     1	      INC CX
- 02AD  81 F9 0226	     1	      CMP CX,550
- 02B1  75 F3		     1	      JNE ??000E
- 02B3  BA 0046		     1	      MOV DX,70
- 02B6  B9 0226		     1	      MOV CX,550
- 02B9			     1	??000F:
- 02B9  B4 0C		     1	      MOV AH,0CH
- 02BB  B0 04		     1	      MOV AL,4
- 02BD  CD 10		     1	      INT 10H
- 02BF  42		     1	      INC DX
- 02C0  83 FA 6E		     1	      CMP DX,110
- 02C3  75 F4		     1	      JNE ??000F       
+ 0270  BA 0046		     1	      MOV DX,70
+ 0273  B9 0082		     1	      MOV CX,130
+ 0276			     1	??000C:
+ 0276  B4 0C		     1	      MOV AH,0CH
+ 0278  B0 04		     1	      MOV AL,4
+ 027A  CD 10		     1	      INT 10H
+ 027C  41		     1	      INC CX
+ 027D  81 F9 0226	     1	      CMP CX,550
+ 0281  75 F3		     1	      JNE ??000C
+ 0283  B9 0082		     1	      MOV CX,130
+ 0286			     1	??000D:
+ 0286  B4 0C		     1	      MOV AH,0CH
+ 0288  B0 04		     1	      MOV AL,4
+ 028A  CD 10		     1	      INT 10H
+ 028C  42		     1	      INC DX
+ 028D  83 FA 6E		     1	      CMP DX,110
+ 0290  75 F4		     1	      JNE ??000D
+ 0292  BA 006E		     1	      MOV DX,110
+ 0295  B9 0082		     1	      MOV CX,130
+ 0298			     1	??000E:
+ 0298  B4 0C		     1	      MOV AH,0CH
+ 029A  B0 04		     1	      MOV AL,4
+ 029C  CD 10		     1	      INT 10H
+ 029E  41		     1	      INC CX
+ 029F  81 F9 0226	     1	      CMP CX,550
+ 02A3  75 F3		     1	      JNE ??000E
+ 02A5  BA 0046		     1	      MOV DX,70
+ 02A8  B9 0226		     1	      MOV CX,550
+ 02AB			     1	??000F:
+ 02AB  B4 0C		     1	      MOV AH,0CH
+ 02AD  B0 04		     1	      MOV AL,4
+ 02AF  CD 10		     1	      INT 10H
+ 02B1  42		     1	      INC DX
+ 02B2  83 FA 6E		     1	      CMP DX,110
+ 02B5  75 F4		     1	      JNE ??000F       
 				     FRAME 150,130,400,550,4
- 02C5  BA 0096		     1	      MOV DX,150
- 02C8  B9 0082		     1	      MOV CX,130
- 02CB			     1	??0010:
- 02CB  B4 0C		     1	      MOV AH,0CH
- 02CD  B0 04		     1	      MOV AL,4
- 02CF  CD 10		     1	      INT 10H
- 02D1  41		     1	      INC CX
- 02D2  81 F9 0226	     1	      CMP CX,550
- 02D6  75 F3		     1	      JNE ??0010
- 02D8  B9 0082		     1	      MOV CX,130
- 02DB			     1	??0011:
- 02DB  B4 0C		     1	      MOV AH,0CH
- 02DD  B0 04		     1	      MOV AL,4
- 02DF  CD 10		     1	      INT 10H
- 02E1  42		     1	      INC DX
- 02E2  81 FA 0190	     1	      CMP DX,400
- 02E6  75 F3		     1	      JNE ??0011
- 02E8  BA 0190		     1	      MOV DX,400
- 02EB  B9 0082		     1	      MOV CX,130
- 02EE			     1	??0012:
- 02EE  B4 0C		     1	      MOV AH,0CH
- 02F0  B0 04		     1	      MOV AL,4
- 02F2  CD 10		     1	      INT 10H
- 02F4  41		     1	      INC CX
- 02F5  81 F9 0226	     1	      CMP CX,550
- 02F9  75 F3		     1	      JNE ??0012
- 02FB  BA 0096		     1	      MOV DX,150
- 02FE  B9 0226		     1	      MOV CX,550
- 0301			     1	??0013:
- 0301  B4 0C		     1	      MOV AH,0CH
- 0303  B0 04		     1	      MOV AL,4
- 0305  CD 10		     1	      INT 10H
- 0307  42		     1	      INC DX
- 0308  81 FA 0190	     1	      CMP DX,400
- 030C  75 F3		     1	      JNE ??0013       
+ 02B7  BA 0096		     1	      MOV DX,150
+ 02BA  B9 0082		     1	      MOV CX,130
+ 02BD			     1	??0010:
+ 02BD  B4 0C		     1	      MOV AH,0CH
+ 02BF  B0 04		     1	      MOV AL,4
+ 02C1  CD 10		     1	      INT 10H
+ 02C3  41		     1	      INC CX
+ 02C4  81 F9 0226	     1	      CMP CX,550
+ 02C8  75 F3		     1	      JNE ??0010
+ 02CA  B9 0082		     1	      MOV CX,130
+ 02CD			     1	??0011:
+ 02CD  B4 0C		     1	      MOV AH,0CH
+ 02CF  B0 04		     1	      MOV AL,4
+ 02D1  CD 10		     1	      INT 10H
+ 02D3  42		     1	      INC DX
+ 02D4  81 FA 0190	     1	      CMP DX,400
+ 02D8  75 F3		     1	      JNE ??0011
+ 02DA  BA 0190		     1	      MOV DX,400
+ 02DD  B9 0082		     1	      MOV CX,130
+ 02E0			     1	??0012:
+ 02E0  B4 0C		     1	      MOV AH,0CH
+ 02E2  B0 04		     1	      MOV AL,4
+ 02E4  CD 10		     1	      INT 10H
+ 02E6  41		     1	      INC CX
+ 02E7  81 F9 0226	     1	      CMP CX,550
+ 02EB  75 F3		     1	      JNE ??0012
+ 02ED  BA 0096		     1	      MOV DX,150
+ 02F0  B9 0226		     1	      MOV CX,550
+ 02F3			     1	??0013:
+ 02F3  B4 0C		     1	      MOV AH,0CH
+ 02F5  B0 04		     1	      MOV AL,4
+ 02F7  CD 10		     1	      INT 10H
+ 02F9  42		     1	      INC DX
+ 02FA  81 FA 0190	     1	      CMP DX,400
+ 02FE  75 F3		     1	      JNE ??0013       
 				     FRAME 420,150,450,250,4
- 030E  BA 01A4		     1	      MOV DX,420
- 0311  B9 0096		     1	      MOV CX,150
- 0314			     1	??0014:
- 0314  B4 0C		     1	      MOV AH,0CH
- 0316  B0 04		     1	      MOV AL,4
- 0318  CD 10		     1	      INT 10H
- 031A  41		     1	      INC CX
- 031B  81 F9 00FA	     1	      CMP CX,250
- 031F  75 F3		     1	      JNE ??0014
- 0321  B9 0096		     1	      MOV CX,150
- 0324			     1	??0015:
- 0324  B4 0C		     1	      MOV AH,0CH
- 0326  B0 04		     1	      MOV AL,4
- 0328  CD 10		     1	      INT 10H
- 032A  42		     1	      INC DX
- 032B  81 FA 01C2	     1	      CMP DX,450
- 032F  75 F3		     1	      JNE ??0015
- 0331  BA 01C2		     1	      MOV DX,450
- 0334  B9 0096		     1	      MOV CX,150
- 0337			     1	??0016:
- 0337  B4 0C		     1	      MOV AH,0CH
- 0339  B0 04		     1	      MOV AL,4
- 033B  CD 10		     1	      INT 10H
- 033D  41		     1	      INC CX
- 033E  81 F9 00FA	     1	      CMP CX,250
- 0342  75 F3		     1	      JNE ??0016
- 0344  BA 01A4		     1	      MOV DX,420
- 0347  B9 00FA		     1	      MOV CX,250
- 034A			     1	??0017:
- 034A  B4 0C		     1	      MOV AH,0CH
- 034C  B0 04		     1	      MOV AL,4
- 034E  CD 10		     1	      INT 10H
- 0350  42		     1	      INC DX
- 0351  81 FA 01C2	     1	      CMP DX,450
- 0355  75 F3		     1	      JNE ??0017       
+ 0300  BA 01A4		     1	      MOV DX,420
+ 0303  B9 0096		     1	      MOV CX,150
+ 0306			     1	??0014:
+ 0306  B4 0C		     1	      MOV AH,0CH
+ 0308  B0 04		     1	      MOV AL,4
+ 030A  CD 10		     1	      INT 10H
+ 030C  41		     1	      INC CX
+ 030D  81 F9 00FA	     1	      CMP CX,250
+ 0311  75 F3		     1	      JNE ??0014
+ 0313  B9 0096		     1	      MOV CX,150
+ 0316			     1	??0015:
+ 0316  B4 0C		     1	      MOV AH,0CH
+ 0318  B0 04		     1	      MOV AL,4
+ 031A  CD 10		     1	      INT 10H
+ 031C  42		     1	      INC DX
+ 031D  81 FA 01C2	     1	      CMP DX,450
+ 0321  75 F3		     1	      JNE ??0015
+ 0323  BA 01C2		     1	      MOV DX,450
+ 0326  B9 0096		     1	      MOV CX,150
+ 0329			     1	??0016:
+ 0329  B4 0C		     1	      MOV AH,0CH
+ 032B  B0 04		     1	      MOV AL,4
+ 032D  CD 10		     1	      INT 10H
+ 032F  41		     1	      INC CX
+ 0330  81 F9 00FA	     1	      CMP CX,250
+ 0334  75 F3		     1	      JNE ??0016
+ 0336  BA 01A4		     1	      MOV DX,420
+ 0339  B9 00FA		     1	      MOV CX,250
+ 033C			     1	??0017:
+ 033C  B4 0C		     1	      MOV AH,0CH
+ 033E  B0 04		     1	      MOV AL,4
+ 0340  CD 10		     1	      INT 10H
+ 0342  42		     1	      INC DX
+ 0343  81 FA 01C2	     1	      CMP DX,450
+ 0347  75 F3		     1	      JNE ??0017       
 				     FRAME 420,430,450,530,4
- 0357  BA 01A4		     1	      MOV DX,420
- 035A  B9 01AE		     1	      MOV CX,430
- 035D			     1	??0018:
- 035D  B4 0C		     1	      MOV AH,0CH
- 035F  B0 04		     1	      MOV AL,4
- 0361  CD 10		     1	      INT 10H
- 0363  41		     1	      INC CX
- 0364  81 F9 0212	     1	      CMP CX,530
- 0368  75 F3		     1	      JNE ??0018
- 036A  B9 01AE		     1	      MOV CX,430
- 036D			     1	??0019:
- 036D  B4 0C		     1	      MOV AH,0CH
- 036F  B0 04		     1	      MOV AL,4
- 0371  CD 10		     1	      INT 10H
- 0373  42		     1	      INC DX
- 0374  81 FA 01C2	     1	      CMP DX,450
- 0378  75 F3		     1	      JNE ??0019
- 037A  BA 01C2		     1	      MOV DX,450
- 037D  B9 01AE		     1	      MOV CX,430
- 0380			     1	??001A:
- 0380  B4 0C		     1	      MOV AH,0CH
- 0382  B0 04		     1	      MOV AL,4
- 0384  CD 10		     1	      INT 10H
- 0386  41		     1	      INC CX
- 0387  81 F9 0212	     1	      CMP CX,530
- 038B  75 F3		     1	      JNE ??001A
- 038D  BA 01A4		     1	      MOV DX,420
- 0390  B9 0212		     1	      MOV CX,530
- 0393			     1	??001B:
- 0393  B4 0C		     1	      MOV AH,0CH
- 0395  B0 04		     1	      MOV AL,4
- 0397  CD 10		     1	      INT 10H
- 0399  42		     1	      INC DX
- 039A  81 FA 01C2	     1	      CMP DX,450
- 039E  75 F3		     1	      JNE ??001B       
+ 0349  BA 01A4		     1	      MOV DX,420
+ 034C  B9 01AE		     1	      MOV CX,430
+ 034F			     1	??0018:
+ 034F  B4 0C		     1	      MOV AH,0CH
+ 0351  B0 04		     1	      MOV AL,4
+ 0353  CD 10		     1	      INT 10H
+ 0355  41		     1	      INC CX
+ 0356  81 F9 0212	     1	      CMP CX,530
+ 035A  75 F3		     1	      JNE ??0018
+ 035C  B9 01AE		     1	      MOV CX,430
+ 035F			     1	??0019:
+ 035F  B4 0C		     1	      MOV AH,0CH
+ 0361  B0 04		     1	      MOV AL,4
+ 0363  CD 10		     1	      INT 10H
+ 0365  42		     1	      INC DX
+ 0366  81 FA 01C2	     1	      CMP DX,450
+ 036A  75 F3		     1	      JNE ??0019
+ 036C  BA 01C2		     1	      MOV DX,450
+ 036F  B9 01AE		     1	      MOV CX,430
+ 0372			     1	??001A:
+ 0372  B4 0C		     1	      MOV AH,0CH
+ 0374  B0 04		     1	      MOV AL,4
+ 0376  CD 10		     1	      INT 10H
+ 0378  41		     1	      INC CX
+ 0379  81 F9 0212	     1	      CMP CX,530
+ 037D  75 F3		     1	      JNE ??001A
+ 037F  BA 01A4		     1	      MOV DX,420
+ 0382  B9 0212		     1	      MOV CX,530
+ 0385			     1	??001B:
+ 0385  B4 0C		     1	      MOV AH,0CH
+ 0387  B0 04		     1	      MOV AL,4
+ 0389  CD 10		     1	      INT 10H
+ 038B  42		     1	      INC DX
+ 038C  81 FA 01C2	     1	      CMP DX,450
+ 0390  75 F3		     1	      JNE ??001B       
 				     
 				     CURSOR 5,10
- 03A0  B4 02		     1	       MOV AH,02H
- 03A2  B7 00		     1	       MOV BH,00
- 03A4  B6 05		     1	       MOV DH,5
- 03A6  B2 0A		     1	       MOV DL,10  ;设置光标位置
- 03A8  CD 10		     1	       INT 10H
+ 0392  B4 02		     1	       MOV AH,02H
+ 0394  B7 00		     1	       MOV BH,00
+ 0396  B6 05		     1	       MOV DH,5
+ 0398  B2 0A		     1	       MOV DL,10  ;设置光标位置
+ 039A  CD 10		     1	       INT 10H
 				     DISPLAY TITLETEXT
- 03AA  B4 09		     1	       MOV AH,09H
- 03AC  BA 0048 R	     1	       MOV DX,OFFSET TITLETEXT  ;装入字符串地址
- 03AF  CD 21		     1	       INT 21H
+ 039C  B4 09		     1	       MOV AH,09H
+ 039E  BA 0048 R	     1	       MOV DX,OFFSET TITLETEXT  ;装入字符串地址
+ 03A1  CD 21		     1	       INT 21H
 				     CURSOR 10,8
- 03B1  B4 02		     1	       MOV AH,02H
- 03B3  B7 00		     1	       MOV BH,00
- 03B5  B6 0A		     1	       MOV DH,10
- 03B7  B2 08		     1	       MOV DL,8  ;设置光标位置
- 03B9  CD 10		     1	       INT 10H
+ 03A3  B4 02		     1	       MOV AH,02H
+ 03A5  B7 00		     1	       MOV BH,00
+ 03A7  B6 0A		     1	       MOV DH,10
+ 03A9  B2 08		     1	       MOV DL,8  ;设置光标位置
+ 03AB  CD 10		     1	       INT 10H
 				     DISPLAY CONTEXTTEXT
- 03BB  B4 09		     1	       MOV AH,09H
- 03BD  BA 004F R	     1	       MOV DX,OFFSET CONTEXTTEXT  ;装入字符串地址
- 03C0  CD 21		     1	       INT 21H
+ 03AD  B4 09		     1	       MOV AH,09H
+ 03AF  BA 004F R	     1	       MOV DX,OFFSET CONTEXTTEXT  ;装入字符串地址
+ 03B2  CD 21		     1	       INT 21H
+				     CURSOR 8,70
+ 03B4  B4 02		     1	       MOV AH,02H
+ 03B6  B7 00		     1	       MOV BH,00
+ 03B8  B6 08		     1	       MOV DH,8
+ 03BA  B2 46		     1	       MOV DL,70  ;设置光标位置
+ 03BC  CD 10		     1	       INT 10H
+				     DISPLAY INFORMATION
+ 03BE  B4 09		     1	       MOV AH,09H
+ 03C0  BA 00A2 R	     1	       MOV DX,OFFSET INFORMATION  ;装入字符串地址
+ 03C3  CD 21		     1	       INT 21H
 				     CURSOR 27,23
- 03C2  B4 02		     1	       MOV AH,02H
- 03C4  B7 00		     1	       MOV BH,00
- 03C6  B6 1B		     1	       MOV DH,27
- 03C8  B2 17		     1	       MOV DL,23  ;设置光标位置
- 03CA  CD 10		     1	       INT 10H
+ 03C5  B4 02		     1	       MOV AH,02H
+ 03C7  B7 00		     1	       MOV BH,00
+ 03C9  B6 1B		     1	       MOV DH,27
+ 03CB  B2 17		     1	       MOV DL,23  ;设置光标位置
+ 03CD  CD 10		     1	       INT 10H
 				     DISPLAY SAVETEXT
- 03CC  B4 09		     1	       MOV AH,09H
- 03CE  BA 0058 R	     1	       MOV DX,OFFSET SAVETEXT  ;装入字符串地址
- 03D1  CD 21		     1	       INT 21H
+ 03CF  B4 09		     1	       MOV AH,09H
+ 03D1  BA 0058 R	     1	       MOV DX,OFFSET SAVETEXT  ;装入字符串地址
+ 03D4  CD 21		     1	       INT 21H
 				     CURSOR 27,58
- 03D3  B4 02		     1	       MOV AH,02H
- 03D5  B7 00		     1	       MOV BH,00
- 03D7  B6 1B		     1	       MOV DH,27
- 03D9  B2 3A		     1	       MOV DL,58  ;设置光标位置
- 03DB  CD 10		     1	       INT 10H
+ 03D6  B4 02		     1	       MOV AH,02H
+ 03D8  B7 00		     1	       MOV BH,00
+ 03DA  B6 1B		     1	       MOV DH,27
+ 03DC  B2 3A		     1	       MOV DL,58  ;设置光标位置
+ 03DE  CD 10		     1	       INT 10H
 				     DISPLAY BACKTEXT
- 03DD  B4 09		     1	       MOV AH,09H
- 03DF  BA 005D R	     1	       MOV DX,OFFSET BACKTEXT  ;装入字符串地址
- 03E2  CD 21		     1	       INT 21H
+ 03E0  B4 09		     1	       MOV AH,09H
+ 03E2  BA 005D R	     1	       MOV DX,OFFSET BACKTEXT  ;装入字符串地址
+ 03E5  CD 21		     1	       INT 21H
 				     
 				     CURSOR 0,0
- 03E4  B4 02		     1	       MOV AH,02H
- 03E6  B7 00		     1	       MOV BH,00
- 03E8  B6 00		     1	       MOV DH,0
- 03EA  B2 00		     1	       MOV DL,0  ;设置光标位置
- 03EC  CD 10		     1	       INT 10H
- 03EE  B8 0000			     MOV AX,0000H      ;初始化鼠标
- 03F1  CD 33			     INT 33H
+ 03E7  B4 02		     1	       MOV AH,02H
+ 03E9  B7 00		     1	       MOV BH,00
+ 03EB  B6 00		     1	       MOV DH,0
+ 03ED  B2 00		     1	       MOV DL,0  ;设置光标位置
+ 03EF  CD 10		     1	       INT 10H
+ 03F1  B8 0000			     MOV AX,0000H      ;初始化鼠标
+ 03F4  CD 33			     INT 33H
 				     
- 03F3				NEWBACK:
- 03F3  B8 0001			     MOV AX,01H
- 03F6  CD 33			     INT 33H           ;检查鼠标光标
- 03F8  B8 0003			     MOV AX,03H        ;检查是否按下鼠标
- 03FB  CD 33			     INT 33H
- 03FD  83 FB 01			     CMP BX,0001H      ;现在在cx=列dx=行的位置
- 0400  75 F1			     JNE NEWBACK       ;检查左键是否按下
- 0402  83 FA 46			     CMP DX,70
- 0405  72 53			     JB  NEWBACK2
- 0407  83 FA 6E			     CMP DX,110
- 040A  77 4E			     JA  NEWBACK2
- 040C  81 F9 0082		     CMP CX,130
- 0410  72 48			     JB  NEWBACK2
- 0412  81 F9 0226		     CMP CX,550
- 0416  77 42			     JA  NEWBACK2
+ 03F6				NEWBACK:
+ 03F6  B8 0001			     MOV AX,01H
+ 03F9  CD 33			     INT 33H           ;检查鼠标光标
+ 03FB  B8 0003			     MOV AX,03H        ;检查是否按下鼠标
+ 03FE  CD 33			     INT 33H
+ 0400  83 FB 01			     CMP BX,0001H      ;现在在cx=列dx=行的位置
+ 0403  75 F1			     JNE NEWBACK       ;检查左键是否按下
+ 0405  83 FA 46			     CMP DX,70
+ 0408  72 62			     JB  NEWBACK2
+ 040A  83 FA 6E			     CMP DX,110
+ 040D  77 5D			     JA  NEWBACK2
+ 040F  81 F9 0082		     CMP CX,130
+ 0413  72 57			     JB  NEWBACK2
+ 0415  81 F9 0226		     CMP CX,550
+ 0419  77 51			     JA  NEWBACK2
 				     
-				     CURSOR 0,0
- 0418  B4 02		     1	       MOV AH,02H
- 041A  B7 00		     1	       MOV BH,00
- 041C  B6 00		     1	       MOV DH,0
- 041E  B2 00		     1	       MOV DL,0  ;设置光标位置
- 0420  CD 10		     1	       INT 10H
+				     CURSOR 3,16
+ 041B  B4 02		     1	       MOV AH,02H
+ 041D  B7 00		     1	       MOV BH,00
+ 041F  B6 03		     1	       MOV DH,3
+ 0421  B2 10		     1	       MOV DL,16  ;设置光标位置
+ 0423  CD 10		     1	       INT 10H
 				     DISPLAY TITLEMESSAGE
- 0422  B4 09		     1	       MOV AH,09H
- 0424  BA 006A R	     1	       MOV DX,OFFSET TITLEMESSAGE  ;装入字符串地址
- 0427  CD 21		     1	       INT 21H
+ 0425  B4 09		     1	       MOV AH,09H
+ 0427  BA 006B R	     1	       MOV DX,OFFSET TITLEMESSAGE  ;装入字符串地址
+ 042A  CD 21		     1	       INT 21H
 				     ;获取标题
- 0429  B4 0A			     MOV AH,0AH
- 042B  BA 00A1 R		     MOV DX,OFFSET ADDRESS
- 042E  CD 21			     INT 21H                  
+				     CURSOR 5,18
+ 042C  B4 02		     1	       MOV AH,02H
+ 042E  B7 00		     1	       MOV BH,00
+ 0430  B6 05		     1	       MOV DH,5
+ 0432  B2 12		     1	       MOV DL,18  ;设置光标位置
+ 0434  CD 10		     1	       INT 10H
+ 0436  B4 0A			     MOV AH,0AH
+ 0438  BA 00A8 R		     MOV DX,OFFSET ADDRESS
+ 043B  CD 21			     INT 21H                  
 				     ;将输入缓冲区中的0DH换为00H
 				     FILEWORD ADDRESS
- 0430  BB 00A1 R	     1	      MOV BX,OFFSET ADDRESS
- 0433  2A ED		     1	      SUB CH,CH
- 0435  8A 4F 01		     1	      MOV CL,[BX]+1
- 0438  89 0E 0116 R	     1	      MOV WORDS,CX
- 043C  2A ED			     SUB CH,CH
- 043E  8B F1			     MOV SI,CX
- 0440  C6 40 02 00		     MOV BYTE PTR[BX+SI]+2,00
+ 043D  BB 00A8 R	     1	      MOV BX,OFFSET ADDRESS
+ 0440  2A ED		     1	      SUB CH,CH
+ 0442  8A 4F 01		     1	      MOV CL,[BX]+1
+ 0445  89 0E 011D R	     1	      MOV WORDS,CX
+ 0449  2A ED			     SUB CH,CH
+ 044B  8B F1			     MOV SI,CX
+ 044D  C6 40 02 00		     MOV BYTE PTR[BX+SI]+2,00
 				     ;获取文件名到00结束，新建文件
- 0444  BA 00A1 R		     MOV DX,OFFSET ADDRESS
- 0447  42			     INC DX
- 0448  42			     INC DX
- 0449  B9 0000			     MOV CX,0
- 044C  B4 3C			     MOV AH,3CH
- 044E  CD 21			     INT 21H
- 0450  73 03 E9 0093		     JC  ERROR
- 0455  A3 0114 R		     MOV HANDLE,AX
- 0458  EB 99			     JMP NEWBACK
+ 0451  BA 00A8 R		     MOV DX,OFFSET ADDRESS
+ 0454  42			     INC DX
+ 0455  42			     INC DX
+ 0456  B9 0000			     MOV CX,0
+ 0459  B4 3C			     MOV AH,3CH
+ 045B  CD 21			     INT 21H
+ 045D  73 03 E9 00A7		     JC  ERROR
+ 0462  C6 06 011F R 00		     MOV ERRORTIMES,0
+ 0467  A3 011B R		     MOV HANDLE,AX
+ 046A  EB 8A			     JMP NEWBACK
 				          
- 045A				NEWBACK2:     
- 045A  81 FA 0096		     CMP DX,150
- 045E  72 56			     JB  NEWBACK3
- 0460  81 FA 0190		     CMP DX,400
- 0464  77 50			     JA  NEWBACK3
- 0466  81 F9 0082		     CMP CX,130
- 046A  72 4A			     JB  NEWBACK3
- 046C  81 F9 0226		     CMP CX,550
- 0470  77 44			     JA  NEWBACK3
+ 046C				NEWBACK2:     
+ 046C  81 FA 0096		     CMP DX,150
+ 0470  72 65			     JB  NEWBACK3
+ 0472  81 FA 0190		     CMP DX,400
+ 0476  77 5F			     JA  NEWBACK3
+ 0478  81 F9 0082		     CMP CX,130
+ 047C  72 59			     JB  NEWBACK3
+ 047E  81 F9 0226		     CMP CX,550
+ 0482  77 53			     JA  NEWBACK3
 				     
-				     CURSOR 10,10
- 0472  B4 02		     1	       MOV AH,02H
- 0474  B7 00		     1	       MOV BH,00
- 0476  B6 0A		     1	       MOV DH,10
- 0478  B2 0A		     1	       MOV DL,10  ;设置光标位置
- 047A  CD 10		     1	       INT 10H
+				     CURSOR 8,16
+ 0484  B4 02		     1	       MOV AH,02H
+ 0486  B7 00		     1	       MOV BH,00
+ 0488  B6 08		     1	       MOV DH,8
+ 048A  B2 10		     1	       MOV DL,16  ;设置光标位置
+ 048C  CD 10		     1	       INT 10H
 				     DISPLAY CONTEXTMESSAGE
- 047C  B4 09		     1	       MOV AH,09H
- 047E  BA 0088 R	     1	       MOV DX,OFFSET CONTEXTMESSAGE  ;装入字符串地址
- 0481  CD 21		     1	       INT 21H
+ 048E  B4 09		     1	       MOV AH,09H
+ 0490  BA 0089 R	     1	       MOV DX,OFFSET CONTEXTMESSAGE  ;装入字符串地址
+ 0493  CD 21		     1	       INT 21H
 				     ;输入文件内容
- 0483  B4 0A			     MOV AH,0AH
- 0485  BA 00AD R		     MOV DX,OFFSET BUF
- 0488  CD 21			     INT 21H
+				     CURSOR 10,18
+ 0495  B4 02		     1	       MOV AH,02H
+ 0497  B7 00		     1	       MOV BH,00
+ 0499  B6 0A		     1	       MOV DH,10
+ 049B  B2 12		     1	       MOV DL,18  ;设置光标位置
+ 049D  CD 10		     1	       INT 10H
+ 049F  B4 0A			     MOV AH,0AH
+ 04A1  BA 00B4 R		     MOV DX,OFFSET BUF
+ 04A4  CD 21			     INT 21H
 				     
 				     ;获取输入内容字数
 				     FILEWORD BUF
- 048A  BB 00AD R	     1	      MOV BX,OFFSET BUF
- 048D  2A ED		     1	      SUB CH,CH
- 048F  8A 4F 01		     1	      MOV CL,[BX]+1
- 0492  89 0E 0116 R	     1	      MOV WORDS,CX
- 0496  8B 1E 0114 R		     MOV BX,HANDLE
- 049A  8B 0E 0116 R		     MOV CX,WORDS
- 049E  BA 00AD R		     MOV DX,OFFSET BUF
- 04A1  42			     INC DX
- 04A2  42			     INC DX
- 04A3  B4 40			     MOV AH,40H
- 04A5  CD 21			     INT 21H
- 04A7  72 3F			     JC ERROR
-				     
+ 04A6  BB 00B4 R	     1	      MOV BX,OFFSET BUF
+ 04A9  2A ED		     1	      SUB CH,CH
+ 04AB  8A 4F 01		     1	      MOV CL,[BX]+1
+ 04AE  89 0E 011D R	     1	      MOV WORDS,CX
+ 04B2  8B 1E 011B R		     MOV BX,HANDLE
+ 04B6  8B 0E 011D R		     MOV CX,WORDS
+ 04BA  BA 00B4 R		     MOV DX,OFFSET BUF
+ 04BD  42			     INC DX
+ 04BE  42			     INC DX
+ 04BF  B4 40			     MOV AH,40H
+ 04C1  CD 21			     INT 21H
+ 04C3  72 44			     JC ERROR
+ 04C5  C6 06 011F R 00		     MOV ERRORTIMES,0
 				     ;关闭文件
- 04A9  8B 1E 0114 R		     MOV BX,HANDLE
- 04AD  B4 3E			     MOV AH,3EH
- 04AF  CD 21			     INT 21H
- 04B1  72 35			     JC ERROR
- 04B3  E9 FF3D			     JMP NEWBACK
+ 04CA  8B 1E 011B R		     MOV BX,HANDLE
+ 04CE  B4 3E			     MOV AH,3EH
+ 04D0  CD 21			     INT 21H
+ 04D2  72 35			     JC ERROR
+ 04D4  E9 FF1F			     JMP NEWBACK
 
- 04B6				NEWBACK3:     
- 04B6  81 FA 01A4		     CMP DX,420
- 04BA  72 5A			     JB  NEWBACK4
- 04BC  81 FA 01C2		     CMP DX,450
- 04C0  77 54			     JA  NEWBACK4
- 04C2  81 F9 0096		     CMP CX,150
- 04C6  72 4E			     JB  NEWBACK4
- 04C8  81 F9 00FA		     CMP CX,250
- 04CC  77 48			     JA  NEWBACK4
- 04CE  80 3E 0118 R 00		     CMP ERRORTIMES,0
- 04D3  77 1A			     JA  ERRORM
-				     CURSOR 20,20
- 04D5  B4 02		     1	       MOV AH,02H
- 04D7  B7 00		     1	       MOV BH,00
- 04D9  B6 14		     1	       MOV DH,20
- 04DB  B2 14		     1	       MOV DL,20  ;设置光标位置
- 04DD  CD 10		     1	       INT 10H
+ 04D7				NEWBACK3:     
+ 04D7  81 FA 01A4		     CMP DX,420
+ 04DB  72 5A			     JB  NEWBACK4
+ 04DD  81 FA 01C2		     CMP DX,450
+ 04E1  77 54			     JA  NEWBACK4
+ 04E3  81 F9 0096		     CMP CX,150
+ 04E7  72 4E			     JB  NEWBACK4
+ 04E9  81 F9 00FA		     CMP CX,250
+ 04ED  77 48			     JA  NEWBACK4
+ 04EF  80 3E 011F R 00		     CMP ERRORTIMES,0
+ 04F4  77 1A			     JA  ERRORM
+				     CURSOR 10,70
+ 04F6  B4 02		     1	       MOV AH,02H
+ 04F8  B7 00		     1	       MOV BH,00
+ 04FA  B6 0A		     1	       MOV DH,10
+ 04FC  B2 46		     1	       MOV DL,70  ;设置光标位置
+ 04FE  CD 10		     1	       INT 10H
 				     DISPLAY SMESSAGE
- 04DF  B4 09		     1	       MOV AH,09H
- 04E1  BA 0062 R	     1	       MOV DX,OFFSET SMESSAGE  ;装入字符串地址
- 04E4  CD 21		     1	       INT 21H
- 04E6  EB 18			     JMP NEWNEXT
- 04E8				ERROR:
- 04E8  FE 06 0119 R		     INC ERRORMESSAGE
- 04EC  E9 FF04			     JMP NEWBACK     
- 04EF				ERRORM:
-				     CURSOR 20,20
- 04EF  B4 02		     1	       MOV AH,02H
- 04F1  B7 00		     1	       MOV BH,00
- 04F3  B6 14		     1	       MOV DH,20
- 04F5  B2 14		     1	       MOV DL,20  ;设置光标位置
- 04F7  CD 10		     1	       INT 10H
+ 0500  B4 09		     1	       MOV AH,09H
+ 0502  BA 0062 R	     1	       MOV DX,OFFSET SMESSAGE  ;装入字符串地址
+ 0505  CD 21		     1	       INT 21H
+ 0507  EB 2E			     JMP NEWBACK4
+ 0509				ERROR:
+ 0509  FE 06 011F R		     INC ERRORTIMES
+ 050D  E9 FEE6			     JMP NEWBACK     
+ 0510				ERRORM:
+				     CURSOR 10,70
+ 0510  B4 02		     1	       MOV AH,02H
+ 0512  B7 00		     1	       MOV BH,00
+ 0514  B6 0A		     1	       MOV DH,10
+ 0516  B2 46		     1	       MOV DL,70  ;设置光标位置
+ 0518  CD 10		     1	       INT 10H
 				     DISPLAY ERRORMESSAGE
- 04F9  B4 09		     1	       MOV AH,09H
- 04FB  BA 0119 R	     1	       MOV DX,OFFSET ERRORMESSAGE  ;装入字符串地址
- 04FE  CD 21		     1	       INT 21H
- 0500				NEWNEXT:
- 0500  B9 8178			     MOV CX,33144
- 0503  E8 FD4B			     CALL TDELAY
- 0506  B8 0600			     MOV AX,0600H
- 0509  B7 00			     MOV BH,0
- 050B  B9 2020			     MOV CX,2020H
- 050E  BA 2330			     MOV DX,2330H
- 0511  CD 10			     INT 10H
- 0513  E9 FEDD			     JMP NEWBACK
+ 051A  B4 09		     1	       MOV AH,09H
+ 051C  BA 0120 R	     1	       MOV DX,OFFSET ERRORMESSAGE  ;装入字符串地址
+ 051F  CD 21		     1	       INT 21H
+
+ 0521				NEWNEXT:
+ 0521  B9 8178			     MOV CX,33144
+ 0524  E8 003E			     CALL TDELAY
+ 0527  B8 0600			     MOV AX,0600H
+ 052A  B7 00			     MOV BH,0
+ 052C  B9 2020			     MOV CX,2020H
+ 052F  BA 2330			     MOV DX,2330H
+ 0532  CD 10			     INT 10H
+ 0534  E9 FEBF			     JMP NEWBACK
 				     
 				     
 				     
- 0516				NEWBACK4:
- 0516  81 FA 01A4		     CMP DX,420
- 051A  73 03 E9 FED4		     JB  NEWBACK
- 051F  81 FA 01C2		     CMP DX,450
- 0523  76 03 E9 FECB		     JA  NEWBACK
- 0528  81 F9 01AE		     CMP CX,430
- 052C  73 03 E9 FEC2		     JB  NEWBACK
- 0531  81 F9 01C2		     CMP CX,450
- 0535  76 03 E9 FEB9		     JA  NEWBACK
- 053A  C3			     RET
- 053B				MODEL1 ENDP
+ 0537				NEWBACK4:
+ 0537  81 FA 01A4		     CMP DX,420
+ 053B  73 03 E9 FEB6		     JB  NEWBACK
+ 0540  81 FA 01C2		     CMP DX,450
+ 0544  76 03 E9 FEAD		     JA  NEWBACK
+ 0549  81 F9 01AE		     CMP CX,430
+ 054D  73 03 E9 FEA4		     JB  NEWBACK
+ 0552  81 F9 0212		     CMP CX,530
+ 0556  76 03 E9 FE9B		     JA  NEWBACK
+ 055B  E9 FB57			     JMP SECONDPAINT
+				    
+
+ 055E				NOT_INSIDE:
+ 055E  E9 FB26			    JMP BACK
+				    
+ 0561				NOT_INSIDE2:
+				   
+ 0561  B4 4C			    MOV AH,4CH
+ 0563  CD 21			    INT 21H
+ 0565				MAIN ENDP
+
+ 0565				TDELAY PROC NEAR
+ 0565  50			     PUSH AX
+ 0566				W1:  
+ 0566  E4 61			     IN  AL,61H
+ 0568  24 10			     AND AL,00010000B
+ 056A  38 E0			     CMP AL,AH
+ 056C  74 F8			     JE  W1
+ 056E  8A E0			     MOV AH,AL
+ 0570  E2 F4			     LOOP W1
+ 0572  58			     POP AX
+ 0573  C3			     RET
+ 0574				TDELAY ENDP
 
 
 
- 053B				CODES ENDS
+
+
+
+ 0574				CODES ENDS
 				    END START
 
 
@@ -854,7 +882,8 @@ tempfile.asm						     Page 1 - 1
 
 
 
-Microsoft (R) Macro Assembler Version 6.11		    12/02/16 14:29:43
+
+Microsoft (R) Macro Assembler Version 6.11		    01/05/17 15:58:46
 tempfile.asm						     Symbols 2 - 1
 
 
@@ -876,8 +905,8 @@ Segments and Groups:
 
                 N a m e                 Size     Length   Align   Combine Class
 
-CODES  . . . . . . . . . . . . .	16 Bit	 053B	  Para	  Private 
-DATAS  . . . . . . . . . . . . .	16 Bit	 0131	  Para	  Private 
+CODES  . . . . . . . . . . . . .	16 Bit	 0574	  Para	  Private 
+DATAS  . . . . . . . . . . . . .	16 Bit	 0138	  Para	  Private 
 STACKS . . . . . . . . . . . . .	16 Bit	 0000	  Para	  Private 
 
 
@@ -885,7 +914,7 @@ Procedures,  parameters and locals:
 
                 N a m e                 Type     Value    Attr
 
-MAIN . . . . . . . . . . . . . .	P Near	 0000	  CODES	Length= 0251 Public
+MAIN . . . . . . . . . . . . . .	P Near	 0000	  CODES	Length= 0565 Public
   FIRST  . . . . . . . . . . . .	L Near	 0005	  CODES	
   ??0000 . . . . . . . . . . . .	L Near	 0033	  CODES	
   ??0001 . . . . . . . . . . . .	L Near	 0036	  CODES	
@@ -902,55 +931,56 @@ MAIN . . . . . . . . . . . . . .	P Near	 0000	  CODES	Length= 0251 Public
   ??000A . . . . . . . . . . . .	L Near	 0181	  CODES	
   ??000B . . . . . . . . . . . .	L Near	 0184	  CODES	
   BACK2  . . . . . . . . . . . .	L Near	 01B3	  CODES	
-  MODEL2 . . . . . . . . . . . .	L Near	 01EB	  CODES	
-  MODEL3 . . . . . . . . . . . .	L Near	 0201	  CODES	
-  MODEL4 . . . . . . . . . . . .	L Near	 0218	  CODES	
-  EXITMAIN . . . . . . . . . . .	L Near	 022F	  CODES	
-  NOT_INSIDE . . . . . . . . . .	L Near	 024A	  CODES	
-  NOT_INSIDE2  . . . . . . . . .	L Near	 024D	  CODES	
-MODEL1 . . . . . . . . . . . . .	P Near	 0260	  CODES	Length= 02DB Public
-  ??000C . . . . . . . . . . . .	L Near	 0284	  CODES	
-  ??000D . . . . . . . . . . . .	L Near	 0294	  CODES	
-  ??000E . . . . . . . . . . . .	L Near	 02A6	  CODES	
-  ??000F . . . . . . . . . . . .	L Near	 02B9	  CODES	
-  ??0010 . . . . . . . . . . . .	L Near	 02CB	  CODES	
-  ??0011 . . . . . . . . . . . .	L Near	 02DB	  CODES	
-  ??0012 . . . . . . . . . . . .	L Near	 02EE	  CODES	
-  ??0013 . . . . . . . . . . . .	L Near	 0301	  CODES	
-  ??0014 . . . . . . . . . . . .	L Near	 0314	  CODES	
-  ??0015 . . . . . . . . . . . .	L Near	 0324	  CODES	
-  ??0016 . . . . . . . . . . . .	L Near	 0337	  CODES	
-  ??0017 . . . . . . . . . . . .	L Near	 034A	  CODES	
-  ??0018 . . . . . . . . . . . .	L Near	 035D	  CODES	
-  ??0019 . . . . . . . . . . . .	L Near	 036D	  CODES	
-  ??001A . . . . . . . . . . . .	L Near	 0380	  CODES	
-  ??001B . . . . . . . . . . . .	L Near	 0393	  CODES	
-  NEWBACK  . . . . . . . . . . .	L Near	 03F3	  CODES	
-  NEWBACK2 . . . . . . . . . . .	L Near	 045A	  CODES	
-  NEWBACK3 . . . . . . . . . . .	L Near	 04B6	  CODES	
-  ERROR  . . . . . . . . . . . .	L Near	 04E8	  CODES	
-  ERRORM . . . . . . . . . . . .	L Near	 04EF	  CODES	
-  NEWNEXT  . . . . . . . . . . .	L Near	 0500	  CODES	
-  NEWBACK4 . . . . . . . . . . .	L Near	 0516	  CODES	
-TDELAY . . . . . . . . . . . . .	P Near	 0251	  CODES	Length= 000F Public
-  W1 . . . . . . . . . . . . . .	L Near	 0252	  CODES	
+  MODEL2 . . . . . . . . . . . .	L Near	 01E7	  CODES	
+  MODEL3 . . . . . . . . . . . .	L Near	 01FD	  CODES	
+  MODEL4 . . . . . . . . . . . .	L Near	 0214	  CODES	
+  EXITMAIN . . . . . . . . . . .	L Near	 022B	  CODES	
+  MODEL1 . . . . . . . . . . . .	L Near	 0252	  CODES	
+  ??000C . . . . . . . . . . . .	L Near	 0276	  CODES	
+  ??000D . . . . . . . . . . . .	L Near	 0286	  CODES	
+  ??000E . . . . . . . . . . . .	L Near	 0298	  CODES	
+  ??000F . . . . . . . . . . . .	L Near	 02AB	  CODES	
+  ??0010 . . . . . . . . . . . .	L Near	 02BD	  CODES	
+  ??0011 . . . . . . . . . . . .	L Near	 02CD	  CODES	
+  ??0012 . . . . . . . . . . . .	L Near	 02E0	  CODES	
+  ??0013 . . . . . . . . . . . .	L Near	 02F3	  CODES	
+  ??0014 . . . . . . . . . . . .	L Near	 0306	  CODES	
+  ??0015 . . . . . . . . . . . .	L Near	 0316	  CODES	
+  ??0016 . . . . . . . . . . . .	L Near	 0329	  CODES	
+  ??0017 . . . . . . . . . . . .	L Near	 033C	  CODES	
+  ??0018 . . . . . . . . . . . .	L Near	 034F	  CODES	
+  ??0019 . . . . . . . . . . . .	L Near	 035F	  CODES	
+  ??001A . . . . . . . . . . . .	L Near	 0372	  CODES	
+  ??001B . . . . . . . . . . . .	L Near	 0385	  CODES	
+  NEWBACK  . . . . . . . . . . .	L Near	 03F6	  CODES	
+  NEWBACK2 . . . . . . . . . . .	L Near	 046C	  CODES	
+  NEWBACK3 . . . . . . . . . . .	L Near	 04D7	  CODES	
+  ERROR  . . . . . . . . . . . .	L Near	 0509	  CODES	
+  ERRORM . . . . . . . . . . . .	L Near	 0510	  CODES	
+  NEWNEXT  . . . . . . . . . . .	L Near	 0521	  CODES	
+  NEWBACK4 . . . . . . . . . . .	L Near	 0537	  CODES	
+  NOT_INSIDE . . . . . . . . . .	L Near	 055E	  CODES	
+  NOT_INSIDE2  . . . . . . . . .	L Near	 0561	  CODES	
+TDELAY . . . . . . . . . . . . .	P Near	 0565	  CODES	Length= 000F Public
+  W1 . . . . . . . . . . . . . .	L Near	 0566	  CODES	
 
 
 Symbols:
 
                 N a m e                 Type     Value    Attr
 
-ADDRESS  . . . . . . . . . . . .	Byte	 00A1	  DATAS	
+ADDRESS  . . . . . . . . . . . .	Byte	 00A8	  DATAS	
 BACKTEXT . . . . . . . . . . . .	Byte	 005D	  DATAS	
-BUF  . . . . . . . . . . . . . .	Byte	 00AD	  DATAS	
-CONTEXTMESSAGE . . . . . . . . .	Byte	 0088	  DATAS	
+BUF  . . . . . . . . . . . . . .	Byte	 00B4	  DATAS	
+CONTEXTMESSAGE . . . . . . . . .	Byte	 0089	  DATAS	
 CONTEXTTEXT  . . . . . . . . . .	Byte	 004F	  DATAS	
 CR . . . . . . . . . . . . . . .	Number	 000Dh	 
-ERRORMESSAGE . . . . . . . . . .	Byte	 0119	  DATAS	
-ERRORTIMES . . . . . . . . . . .	Byte	 0118	  DATAS	
-HANDLE . . . . . . . . . . . . .	Word	 0114	  DATAS	
+ERRORMESSAGE . . . . . . . . . .	Byte	 0120	  DATAS	
+ERRORTIMES . . . . . . . . . . .	Byte	 011F	  DATAS	
+HANDLE . . . . . . . . . . . . .	Word	 011B	  DATAS	
+INFORMATION  . . . . . . . . . .	Byte	 00A2	  DATAS	
 LF . . . . . . . . . . . . . . .	Number	 000Ah	 
-LONG . . . . . . . . . . . . . .	Byte	 0113	  DATAS	
+LONG . . . . . . . . . . . . . .	Byte	 011A	  DATAS	
 MESSAGE_1  . . . . . . . . . . .	Byte	 0000	  DATAS	
 MESSAGE_2  . . . . . . . . . . .	Byte	 0009	  DATAS	
 MESSAGE_3  . . . . . . . . . . .	Byte	 000F	  DATAS	
@@ -964,10 +994,10 @@ OLDVIDEO . . . . . . . . . . . .	Byte	 0045	  DATAS
 SAVETEXT . . . . . . . . . . . .	Byte	 0058	  DATAS	
 SMESSAGE . . . . . . . . . . . .	Byte	 0062	  DATAS	
 START  . . . . . . . . . . . . .	L Near	 0000	  CODES	
-TITLEMESSAGE . . . . . . . . . .	Byte	 006A	  DATAS	
+TITLEMESSAGE . . . . . . . . . .	Byte	 006B	  DATAS	
 TITLETEXT  . . . . . . . . . . .	Byte	 0048	  DATAS	
 WHEATHERIN . . . . . . . . . . .	Byte	 0047	  DATAS	
-WORDS  . . . . . . . . . . . . .	Word	 0116	  DATAS	
+WORDS  . . . . . . . . . . . . .	Word	 011D	  DATAS	
 
 	   0 Warnings
 	   0 Errors

@@ -1,5 +1,7 @@
-Microsoft (R) Macro Assembler Version 6.11		    11/29/16 23:01:43
+Microsoft (R) Macro Assembler Version 6.11		    01/05/17 15:11:09
 tempfile.asm						     Page 1 - 1
+
+
 
 
  0000				DATAS SEGMENT
@@ -33,21 +35,6 @@ tempfile.asm						     Page 1 - 1
 				    ;此处输入堆栈段代码
  0000				STACKS ENDS
 
-				BCDASC MACRO DBUFFERs ;时间数值转换成ASCII码字符子程序
-				PUSH BX
-				PUSH AX
-				CBW
-				MOV BL,10
-				DIV BL
-				ADD AL,'0'
-				MOV DBUFFERs[SI],AL
-				INC SI
-				ADD AH,'0'
-				MOV DBUFFERs[SI],AH
-				INC SI
-				POP AX
-				POP BX
-				ENDM
 
 
  0000				CODES SEGMENT
@@ -56,6 +43,7 @@ tempfile.asm						     Page 1 - 1
  0000				MAIN PROC FAR
  0000  B8 ---- R		    MOV AX,DATAS
  0003  8E D8			    MOV DS,AX
+				    
 				    ;此处输入代码段代码
 				    ;设置时间位置
  0005  B4 02			    MOV AH,02
@@ -255,7 +243,6 @@ tempfile.asm						     Page 1 - 1
  018A				EXIT2:
  018A  C3			    RET
  018B				    JUDGE ENDP
-				    
 				       
  018B				CODES ENDS
 				      END START
@@ -269,17 +256,10 @@ tempfile.asm						     Page 1 - 1
 
 
 
-Microsoft (R) Macro Assembler Version 6.11		    11/29/16 23:01:43
+Microsoft (R) Macro Assembler Version 6.11		    01/05/17 15:11:09
 tempfile.asm						     Symbols 2 - 1
 
 
-
-
-Macros:
-
-                N a m e                 Type
-
-BCDASC . . . . . . . . . . . . .	Proc
 
 
 Segments and Groups:
