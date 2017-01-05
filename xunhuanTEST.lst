@@ -1,0 +1,59 @@
+Microsoft (R) Macro Assembler Version 6.11		    01/05/17 20:30:02
+tempfile.asm						     Page 1 - 1
+
+
+ 0000				DATAS SEGMENT
+				    ;此处输入数据段代码  
+				    
+				    ORG 0000H
+ 0000  0064 [			    DATA1 DB 100 DUP(00)
+        00
+       ]
+				    
+ 0064				DATAS ENDS
+
+ 0000				STACKS SEGMENT
+				    ;此处输入堆栈段代码
+ 0000				STACKS ENDS
+
+ 0000				CODES SEGMENT
+				    ASSUME CS:CODES,DS:DATAS,SS:STACKS
+ 0000				START:
+ 0000  B8 ---- R		    MOV AX,DATAS
+ 0003  8E D8			    MOV DS,AX
+				    ;此处输入代码段代码
+				    
+ 0005  BE 0000 R		    MOV SI,OFFSET DATA1
+ 0008  8B 04			    MOV AX,[SI]
+ 000A  83 C0 01			    ADD AX,1
+ 000D  89 04			    MOV [SI],AX
+				    
+				    
+ 000F  B4 4C			    MOV AH,4CH
+ 0011  CD 21			    INT 21H
+ 0013				CODES ENDS
+				    END START
+Microsoft (R) Macro Assembler Version 6.11		    01/05/17 20:30:02
+tempfile.asm						     Symbols 2 - 1
+
+
+
+
+Segments and Groups:
+
+                N a m e                 Size     Length   Align   Combine Class
+
+CODES  . . . . . . . . . . . . .	16 Bit	 0013	  Para	  Private 
+DATAS  . . . . . . . . . . . . .	16 Bit	 0064	  Para	  Private 
+STACKS . . . . . . . . . . . . .	16 Bit	 0000	  Para	  Private 
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+DATA1  . . . . . . . . . . . . .	Byte	 0000	  DATAS	
+START  . . . . . . . . . . . . .	L Near	 0000	  CODES	
+
+	   0 Warnings
+	   0 Errors

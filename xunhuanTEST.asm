@@ -1,0 +1,29 @@
+DATAS SEGMENT
+    ;此处输入数据段代码  
+    
+    ORG 0000H
+    DATA1 DB 100 DUP(00)
+    
+DATAS ENDS
+
+STACKS SEGMENT
+    ;此处输入堆栈段代码
+STACKS ENDS
+
+CODES SEGMENT
+    ASSUME CS:CODES,DS:DATAS,SS:STACKS
+START:
+    MOV AX,DATAS
+    MOV DS,AX
+    ;此处输入代码段代码
+    
+    MOV SI,OFFSET DATA1
+    MOV AX,[SI]
+    ADD AX,1
+    MOV [SI],AX
+    
+    
+    MOV AH,4CH
+    INT 21H
+CODES ENDS
+    END START
