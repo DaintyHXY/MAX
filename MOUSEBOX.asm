@@ -113,9 +113,10 @@ CONTEXTMESSAGE DB 'PLEASE ENTER THE CONTENT','$'
 INFORMATION DB 'INFO:','$'
 ADDRESS DB 10,?,10 DUP(0FFH)
 BUF     DB 100,?,100 DUP(0FFH)
-MEMONAME DB 100,?,100 DUP(0FFH)
+MEMONAME DB 100 DUP(0FFH)
 MEMOCOUNT DB 00
-MEMONUMBER   DB ?
+NUMBER DB ?
+COUNTLIST DB 100 DUP(00H)
 LISTROW  EQU 30
 LISTEND  EQU 90
 
@@ -204,34 +205,9 @@ SECONDPAINT:
     DISPLAY MESSAGE_6
     FILL 400,500,450,600,4
     CURSOR 26,67
-    DISPLAY MESSAGE_7
+    DISPLAY MESSAGE_7 
     
-    ;备忘录列表界面
-MEMOLIST:
-    SUB AX,AX
-    MOV AL,MEMOCOUNT
-    CMP AL,0
-    JE  SECONDBEGIN
-    FRAME 30,300,300,600,4
-    
-    ;MOV CX,2
-    MOV AL,3
-    MOV BL,40
-    MOV CL,MEMOCOUNT
-LISTLOOP:
-    MOV AH,02H
-    MOV BH,00
-    MOV DH,AL
-    MOV DL,BL  ;设置光标位置
-    INT 10H
-    DISPLAY SMESSAGE
-    ADD AL,2
-    DEC CX
-    CMP CX,0
-    JNE LISTLOOP
-    
- 
-    
+    CALL MEMOLIST   
     
 SECONDBEGIN:    
     MOV AX,0000H
@@ -254,8 +230,8 @@ BACK2:
     CLEARSRC
     MOV CX,33144
     CALL TDELAY
-    JMP MODEL1
-    ;JMP SECONDPAINT
+    CALL MODEL1
+    JMP SECONDPAINT
 MODEL2:   
     CMP CX,50
     JB  MODEL3
@@ -298,7 +274,62 @@ EXITMAIN:
     JMP FIRST
     
  
-    MODEL1:
+        
+
+NOT_INSIDE:
+    JMP BACK
+    
+NOT_INSIDE2:
+   
+    MOV AH,4CH
+    INT 21H
+MAIN ENDP
+
+TDELAY PROC NEAR
+     PUSH AX
+W1:  
+     IN  AL,61H
+     AND AL,00010000B
+     CMP AL,AH
+     JE  W1
+     MOV AH,AL
+     LOOP W1
+     POP AX
+     RET
+TDELAY ENDP
+
+;备忘录列表界面
+MEMOLIST PROC NEAR
+    SUB AX,AX
+    MOV AL,MEMOCOUNT
+    CMP AL,0
+    JE  ENDLIST
+    FRAME 30,300,300,600,4
+    
+    ;MOV CX,2
+    MOV AL,3
+    MOV BL,40
+    SUB CX,CX
+    MOV CL,MEMOCOUNT
+LISTLOOP:
+    MOV AH,02H
+    MOV BH,00
+    MOV DH,AL
+    MOV DL,BL  ;设置光标位置
+    INT 10H
+    DISPLAY SMESSAGE
+    ADD AL,2
+    DEC CX
+    CMP CX,0
+    JNE LISTLOOP
+ENDLIST:
+    MOV CX,33144
+    CALL TDELAY
+    RET
+    MEMOLIST ENDP
+
+
+MODEL1 PROC NEAR
      
      CLEARSRC               ;清除屏幕
      MOV AH,00            ;设置视频模式
@@ -325,7 +356,7 @@ EXITMAIN:
      CURSOR 0,0
      MOV AX,0000H      ;初始化鼠标
      INT 33H
-     
+     CURSOR 0,0
 NEWBACK:
      MOV AX,01H
      INT 33H           ;检查鼠标光标
@@ -364,6 +395,37 @@ NEWBACK:
      JC  ERROR
      MOV ERRORTIMES,0
      MOV HANDLE,AX
+     
+     ;存入现有MEMO数目
+     SUB AX,AX
+     MOV AH,MEMOCOUNT
+     INC AH
+     MOV MEMOCOUNT,AH
+     
+     ;将文件名存入MEMONAME中
+     MOV DI,OFFSET ADDRESS
+     INC DI
+     SUB CX,CX
+     MOV CL,[DI]
+     MOV NUMBER,CL
+     INC DI
+     MOV SI,OFFSET MEMONAME
+NAMELOOP:         
+     MOV AL,[DI]
+     MOV [SI],AL
+     INC DI
+     INC SI
+     DEC CX
+     CMP CX,0
+     JNE NAMELOOP
+     
+     ;将文件名长度存入COUNTLIST
+     SUB BX,BX
+     MOV SI,OFFSET COUNTLIST
+     MOV BL,MEMOCOUNT
+     MOV AL,NUMBER
+     MOV BYTE PTR[SI+BX],AL
+     
      JMP NEWBACK
           
 NEWBACK2:     
@@ -444,44 +506,17 @@ NEWBACK4:
      JB  NEWBACK
      CMP CX,530
      JA  NEWBACK
-     JMP SECONDPAINT
      
+     CLEARSRC
      
-
-        
-     
-     
-    
-
-NOT_INSIDE:
-    JMP BACK
-    
-NOT_INSIDE2:
-   
-    MOV AH,4CH
-    INT 21H
-MAIN ENDP
-
-TDELAY PROC NEAR
-     PUSH AX
-W1:  
-     IN  AL,61H
-     AND AL,00010000B
-     CMP AL,AH
-     JE  W1
-     MOV AH,AL
-     LOOP W1
-     POP AX
      RET
-TDELAY ENDP
-
-
-
-
+MODEL1 ENDP
 
 
 CODES ENDS
     END START
+
+
 
 
 
