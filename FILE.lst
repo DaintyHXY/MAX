@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 6.11		    01/06/17 13:09:19
+Microsoft (R) Macro Assembler Version 6.11		    01/06/17 19:33:55
 tempfile.asm						     Page 1 - 1
 
 
@@ -60,9 +60,13 @@ tempfile.asm						     Page 1 - 1
 				ORG 3000H
  3000 00			NAMEROW DB 0
  3001 00			NAMECOUNT DB 0
+
+ 3002 41 41 41 2E 54 58		FILENAME DB 'AAA.TXT',0
+       54 00
+
  = 000D				CR EQU 0DH
  = 000A				LF EQU 0AH
- 3002				DATAS ENDS
+ 300A				DATAS ENDS
 
  0000				STACKS SEGMENT
 				    ;此处输入堆栈段代码
@@ -102,7 +106,7 @@ tempfile.asm						     Page 1 - 1
  002C  B9 0000			    MOV CX,0
  002F  B4 3C			    MOV AH,3CH
  0031  CD 21			    INT 21H
- 0033  73 03 E9 00ED		    JC ERROR2
+ 0033  73 03 E9 0127		    JC ERROR2
  0038  A3 00D4 R		    MOV HANDLE,AX
  003B  8A 26 2064 R		    MOV AH,MEMOCOUNT
  003F  FE C4			    INC AH
@@ -173,56 +177,78 @@ tempfile.asm						     Page 1 - 1
  00BA  42			    INC DX
  00BB  B4 40			    MOV AH,40H
  00BD  CD 21			    INT 21H
- 00BF  72 64			    JC ERROR2
+ 00BF  73 03 E9 009B		    JC ERROR2
 				    
 				    ;关闭文件
- 00C1  8B 1E 00D4 R		    MOV BX,HANDLE
- 00C5  B4 3E			    MOV AH,3EH
- 00C7  CD 21			    INT 21H
- 00C9  72 5A			    JC ERROR2
+ 00C4  8B 1E 00D4 R		    MOV BX,HANDLE
+ 00C8  B4 3E			    MOV AH,3EH
+ 00CA  CD 21			    INT 21H
+ 00CC  73 03 E9 008E		    JC ERROR2
 				    PRINT SMESSAGE
- 00CB  B4 09		     1	    MOV AH,09H
- 00CD  BA 00CA R	     1	    MOV DX,OFFSET SMESSAGE
- 00D0  CD 21		     1	    INT 21H
+ 00D1  B4 09		     1	    MOV AH,09H
+ 00D3  BA 00CA R	     1	    MOV DX,OFFSET SMESSAGE
+ 00D6  CD 21		     1	    INT 21H
 
 
- 00D2  B0 03			    MOV AL,3
- 00D4  A2 3000 R		    MOV NAMEROW,AL
- 00D7  B3 28			    MOV BL,40
- 00D9  2B C9			    SUB CX,CX
- 00DB  8A 0E 2064 R		    MOV CL,MEMOCOUNT
- 00DF  88 0E 3001 R		    MOV NAMECOUNT,CL
- 00E3  BE 2000 R		    MOV SI,OFFSET COUNTLIST
- 00E6				LISTLOOP:
- 00E6  B4 02			    MOV AH,02H
- 00E8  B7 00			    MOV BH,00
- 00EA  8A 36 3000 R		    MOV DH,NAMEROW
- 00EE  B2 28			    MOV DL,40  ;设置光标位置
- 00F0  CD 10			    INT 10H
+ 00D8  B0 03			    MOV AL,3
+ 00DA  A2 3000 R		    MOV NAMEROW,AL
+ 00DD  B3 28			    MOV BL,40
+ 00DF  2B C9			    SUB CX,CX
+ 00E1  8A 0E 2064 R		    MOV CL,MEMOCOUNT
+ 00E5  88 0E 3001 R		    MOV NAMECOUNT,CL
+ 00E9  BE 2000 R		    MOV SI,OFFSET COUNTLIST
+ 00EC				LISTLOOP:
+ 00EC  B4 02			    MOV AH,02H
+ 00EE  B7 00			    MOV BH,00
+ 00F0  8A 36 3000 R		    MOV DH,NAMEROW
+ 00F4  B2 28			    MOV DL,40  ;设置光标位置
+ 00F6  CD 10			    INT 10H
 				    
 				    ;显示已有备忘录名称
 				    ;DISPLAY SMESSAGE
 				    
- 00F2  B4 09			    MOV AH,09H
- 00F4  BA 1000 R		    MOV DX,OFFSET MEMONAME
- 00F7  02 16 1800 R		    ADD DL,NAMESTART
- 00FB  CD 21			    INT 21H
- 00FD  8A 1E 3001 R		    MOV BL,NAMECOUNT
- 0101  FE CB			    DEC BL
- 0103  88 1E 3001 R		    MOV NAMECOUNT,BL
- 0107  2A FF			    SUB BH,BH
- 0109  8A 38			    MOV BH,BYTE PTR[SI+BX]
- 010B  8A 26 1800 R		    MOV AH,NAMESTART
- 010F  FE CC			    DEC AH
- 0111  2A E7			    SUB AH,BH
- 0113  88 26 1800 R		    MOV NAMESTART,AH
+ 00F8  B4 09			    MOV AH,09H
+ 00FA  BA 1000 R		    MOV DX,OFFSET MEMONAME
+ 00FD  02 16 1800 R		    ADD DL,NAMESTART
+ 0101  CD 21			    INT 21H
+ 0103  8A 1E 3001 R		    MOV BL,NAMECOUNT
+ 0107  FE CB			    DEC BL
+ 0109  88 1E 3001 R		    MOV NAMECOUNT,BL
+ 010D  2A FF			    SUB BH,BH
+ 010F  8A 38			    MOV BH,BYTE PTR[SI+BX]
+ 0111  8A 26 1800 R		    MOV AH,NAMESTART
+ 0115  FE CC			    DEC AH
+ 0117  2A E7			    SUB AH,BH
+ 0119  88 26 1800 R		    MOV NAMESTART,AH
 				    
- 0117  A0 3000 R		    MOV AL,NAMEROW
- 011A  04 02			    ADD AL,2
- 011C  A2 3000 R		    MOV NAMEROW,AL
- 011F  49			    DEC CX
- 0120  83 F9 00			    CMP CX,0
- 0123  75 C1			    JNE LISTLOOP
+ 011D  A0 3000 R		    MOV AL,NAMEROW
+ 0120  04 02			    ADD AL,2
+ 0122  A2 3000 R		    MOV NAMEROW,AL
+ 0125  49			    DEC CX
+ 0126  83 F9 00			    CMP CX,0
+ 0129  75 C1			    JNE LISTLOOP
+				    
+ 012B  BA 3002 R		    MOV DX, OFFSET FILENAME
+ 012E  B0 00			    MOV AL,0
+ 0130  B4 3D			    MOV AH,3DH
+ 0132  CD 21			    INT 21H
+ 0134  72 29			    JC ERROR2
+ 0136  A3 00D4 R		    MOV HANDLE,AX
+ 0139  8B D8			    MOV BX,AX
+ 013B  B9 00FF			    MOV CX,255
+ 013E  BA 005C R		    MOV DX,OFFSET BUF
+ 0141  B4 3F			    MOV AH,3FH
+ 0143  CD 21			    INT 21H
+ 0145  72 18			    JC ERROR2
+ 0147  8B D8			    MOV BX,AX
+ 0149  C6 87 005C R 24		    MOV BUF[BX],'$'
+ 014E  BA 005C R		    MOV DX,OFFSET BUF
+ 0151  B4 09			    MOV AH,09H
+ 0153  CD 21			    INT 21H
+ 0155  8B 1E 00D4 R		    MOV BX,HANDLE
+ 0159  B4 3E			    MOV AH,3EH
+ 015B  CD 21			    INT 21H
+ 015D  73 07			    JNC END1
 				    
 				    
 				    ;删除文件
@@ -235,21 +261,21 @@ tempfile.asm						     Page 1 - 1
 				    ;PRINT SMESSAGE
 				    ;JMP END1
 				 
- 0125				ERROR2:
+ 015F				ERROR2:
 				    PRINT EMESSAGE
- 0125  B4 09		     1	    MOV AH,09H
- 0127  BA 00C2 R	     1	    MOV DX,OFFSET EMESSAGE
- 012A  CD 21		     1	    INT 21H
+ 015F  B4 09		     1	    MOV AH,09H
+ 0161  BA 00C2 R	     1	    MOV DX,OFFSET EMESSAGE
+ 0164  CD 21		     1	    INT 21H
 				    
 				    
 				    
- 012C				END1:
- 012C  B4 4C			    MOV AH,4CH
- 012E  CD 21			    INT 21H
+ 0166				END1:
+ 0166  B4 4C			    MOV AH,4CH
+ 0168  CD 21			    INT 21H
 				    
- 0130				MAIN ENDP
+ 016A				MAIN ENDP
 				   
- 0130				CODES ENDS
+ 016A				CODES ENDS
 				    END START
 
 
@@ -259,7 +285,8 @@ tempfile.asm						     Page 1 - 1
 
 
 
-Microsoft (R) Macro Assembler Version 6.11		    01/06/17 13:09:19
+
+Microsoft (R) Macro Assembler Version 6.11		    01/06/17 19:33:55
 tempfile.asm						     Symbols 2 - 1
 
 
@@ -277,8 +304,8 @@ Segments and Groups:
 
                 N a m e                 Size     Length   Align   Combine Class
 
-CODES  . . . . . . . . . . . . .	16 Bit	 0130	  Para	  Private 
-DATAS  . . . . . . . . . . . . .	16 Bit	 3002	  Para	  Private 
+CODES  . . . . . . . . . . . . .	16 Bit	 016A	  Para	  Private 
+DATAS  . . . . . . . . . . . . .	16 Bit	 300A	  Para	  Private 
 STACKS . . . . . . . . . . . . .	16 Bit	 0000	  Para	  Private 
 
 
@@ -286,11 +313,11 @@ Procedures,  parameters and locals:
 
                 N a m e                 Type     Value    Attr
 
-MAIN . . . . . . . . . . . . . .	P Far	 0000	  CODES	Length= 0130 Public
+MAIN . . . . . . . . . . . . . .	P Far	 0000	  CODES	Length= 016A Public
   NAMELOOP . . . . . . . . . . .	L Near	 005B	  CODES	
-  LISTLOOP . . . . . . . . . . .	L Near	 00E6	  CODES	
-  ERROR2 . . . . . . . . . . . .	L Near	 0125	  CODES	
-  END1 . . . . . . . . . . . . .	L Near	 012C	  CODES	
+  LISTLOOP . . . . . . . . . . .	L Near	 00EC	  CODES	
+  ERROR2 . . . . . . . . . . . .	L Near	 015F	  CODES	
+  END1 . . . . . . . . . . . . .	L Near	 0166	  CODES	
 
 
 Symbols:
@@ -302,6 +329,7 @@ BUF  . . . . . . . . . . . . . .	Byte	 005C	  DATAS
 COUNTLIST  . . . . . . . . . . .	Byte	 2000	  DATAS	
 CR . . . . . . . . . . . . . . .	Number	 000Dh	 
 EMESSAGE . . . . . . . . . . . .	Byte	 00C2	  DATAS	
+FILENAME . . . . . . . . . . . .	Byte	 3002	  DATAS	
 HANDLE . . . . . . . . . . . . .	Word	 00D4	  DATAS	
 LF . . . . . . . . . . . . . . .	Number	 000Ah	 
 LONG . . . . . . . . . . . . . .	Byte	 005B	  DATAS	

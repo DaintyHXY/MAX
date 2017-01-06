@@ -94,9 +94,9 @@ LF EQU 0AH
 MESSAGE_1 DB 'Welcome!','$'
 MESSAGE_2 DB 'ENTER','$'
 MESSAGE_3 DB 'NEWMEMO','$'
-MESSAGE_4 DB 'MODEL2','$'
-MESSAGE_5 DB 'MODEL3','$'
-MESSAGE_6 DB 'MODEL4','$'
+MESSAGE_4 DB 'CHECK','$'
+MESSAGE_5 DB 'DELETE','$'
+MESSAGE_6 DB 'MODIFY','$'
 MESSAGE_7 DB 'EXIT','$'
 MESSAGE_8 DB 'PRESS ENTER TO ENTER','$'
 OLDVIDEO  DB ?
@@ -127,11 +127,20 @@ NAMECOUNT DB 0
 COUNTSTART DB 0
 COUNTEND   DB 0
 
+
 LONG DB ?
 HANDLE DW ?
 WORDS  DW ?
 ERRORTIMES DB 0
 ERRORMESSAGE DB 'ERROR!PLEASE TRY AGAIN!','$'
+
+LISTNUMBER DB ?
+CHOOSEROW  DW ?
+CHECKROW   DW ?
+NOWNAME    DB ?
+NAMEALL    DB 0
+NAMESINGLE DB ?
+NAMESUB    DB 50 DUP(00);临时存储文件名
 
 DATAS ENDS
 
@@ -214,7 +223,13 @@ SECONDPAINT:
     CURSOR 26,67
     DISPLAY MESSAGE_7 
     
-    CALL MEMOLIST   
+    
+    ;FRAME 30,300,80,600,4
+    ;FRAME 80,300,130,600,4
+    ;FRAME 130,300,180,600,4
+    ;FRAME 180,300,230,600,4
+    CALL MEMOLIST  
+     
     
 SECONDBEGIN:    
     MOV AX,0000H
@@ -248,7 +263,12 @@ MODEL2:
     JA  MODEL3
     CMP DX,160
     JA  MODEL3
-    ;CALL MODEL2               ;判断是否在模块2
+    ;CLEARSRC
+    MOV CX,33144
+    CALL TDELAY
+    CALL CHECKPRO               ;判断是否在模块2
+    JMP SECONDPAINT
+    
 MODEL3:    
     CMP CX,50
     JB  MODEL4
@@ -278,13 +298,16 @@ EXITMAIN:
     JA  NOT_INSIDE2
     CMP DX,450
     JA  NOT_INSIDE2
-    JMP FIRST
+    ;CLEARSRC
+    ;MOV CX,33144
+    ;CALL TDELAY
+    ;JMP FIRST
     
  
         
 
 NOT_INSIDE:
-    JMP BACK
+    JMP SECONDPAINT
     
 NOT_INSIDE2:
    
@@ -305,7 +328,7 @@ W1:
      RET
 TDELAY ENDP
 
-;备忘录列表界面
+;----------------------------------备忘录列表界面------------------------------------
 MEMOLIST PROC NEAR
     SUB AX,AX
     MOV AL,MEMOCOUNT
@@ -350,7 +373,7 @@ LISTLOOP:
     MOV NAMECOUNT,BL
     
     MOV AL,NAMEROW
-    ADD AL,2
+    ADD AL,3
     MOV NAMEROW,AL
     DEC CX
     CMP CX,0
@@ -361,7 +384,7 @@ ENDLIST:
     RET
     MEMOLIST ENDP
 
-
+;----------------------------------------新建MEMO界面-------------------------------
 MODEL1 PROC NEAR
      
      CLEARSRC               ;清除屏幕
@@ -561,10 +584,176 @@ BACKLP:
      
      RET
 MODEL1 ENDP
+;---------------------------根据列表查看具体内容------------------------
+CHECKPRO PROC NEAR
 
+    ;CLEARSRC               ;清除屏幕
+    MOV AH,00            ;设置视频模式
+    MOV AL,NEWVIDEO
+    INT 10H
+    
+    ;FRAME 30,300,300,600,4
+    ;FRAME 30,300,80,600,4
+    ;FRAME 80,300,130,600,4
+    ;FRAME 130,300,180,600,4
+    ;FRAME 180,300,230,600,4
+     CURSOR 27,58
+     DISPLAY BACKTEXT
+     FRAME 420,430,450,530,4
+     FRAME 30,30,300,280,4
+     CALL MEMOLIST
+     
+    
+     CURSOR 0,0
+     MOV AX,0000H      ;初始化鼠标
+     INT 33H
+     CURSOR 0,0
+     MOV AX,04H
+     MOV CX,0
+     MOV DX,0
+     INT 33H
+CHECK2:
+     MOV AX,01H
+     INT 33H           ;检查鼠标光标
+     MOV AX,03H        ;检查是否按下鼠标
+     INT 33H
+     CMP BX,0001H      ;现在在cx=列dx=行的位置
+     JNE CHECK2       ;检查左键是否按下
+     CMP DX,420
+     JB  CHECK3
+     CMP DX,450
+     JA  CHECK3
+     CMP CX,430
+     JB  CHECK3
+     CMP CX,530
+     JA  CHECK3
+     JMP CHECKEND
+CHECK3:  
+     SUB AX,AX
+     MOV AL,MEMOCOUNT
+     MOV LISTNUMBER,AL
+     CMP AL,0
+     JE  CHECK2
+     CMP CX,300
+     JB  CHECK2
+     CMP CX,600
+     JA  CHECK2
+     CMP DX,30
+     JBE  CHECK2
+     CMP DX,280
+     JAE  CHECK2
+     MOV CHOOSEROW,DX
+     SUB AX,AX
+     MOV AX,CHOOSEROW
+     SUB AX,30
+     SUB DX,DX
+     SUB BX,BX
+     MOV BX,50
+     DIV BX
+     MOV CHECKROW,AX;选中的行-1，第1行是最后一个备忘录名字
+     SUB AX,AX
+     MOV AL,LISTNUMBER
+     SUB BX,BX
+     MOV BX,CHECKROW
+     SUB AX,BX
+     MOV NOWNAME,AL;选中行的文件的序号
+     SUB AH,AH
+     SUB CX,CX
+     
+     MOV SI,OFFSET COUNTLIST
+     SUB BX,BX
+     MOV BL,NOWNAME
+     MOV BH,BYTE PTR[SI+BX];获得当前文件的名字的字数
+     MOV NAMESINGLE,BH
+     
+     MOV SI,OFFSET COUNTLIST
+     SUB AH,AH
+     MOV CL,NOWNAME    
+     
+COUNTLP:
+     ADD AH,[SI];计算所需文件名前其他文件名字数的总和
+     INC SI
+     DEC CL
+     CMP CL,0
+     JA COUNTLP
+     MOV NAMEALL,AH
+     
+     SUB AX,AX
+     MOV AL,NOWNAME
+     SUB CX,CX
+     MOV CL,NAMEALL
+     DEC AL
+     
+     MOV BX, OFFSET MEMONAME;BX是文件名的首地址
+     ADD BX,AX
+     ADD BX,CX
+ 
+     
+     SUB CX,CX
+     MOV CL,NAMESINGLE
+     SUB AX,AX
+     MOV SI,OFFSET NAMESUB
+NAMECOPYLP:
+     MOV AL,BYTE PTR[BX]
+     MOV [SI],AL
+     INC BX
+     INC SI
+     DEC CX
+     CMP CX,0
+     JA NAMECOPYLP
+     
+     MOV DX,OFFSET NAMESUB
+     MOV AL,0
+     MOV AH,3DH
+     INT 21H ;打开文件
+     JC ERROR1
+     MOV HANDLE,AX;保存文件号
+     MOV BX,AX
+     MOV CX,255
+     MOV DX,OFFSET BUF
+     MOV AH,3FH
+     INT 21H;从文件中读255字节到BUF中
+     JC ERROR2
+     MOV BX,AX;实际读到的字符数送入BX
+     MOV BUF[BX],'$';在文件结束处放置1个'$'
+     CURSOR 3,5
+     MOV DX,OFFSET BUF
+     MOV AH,09H
+     INT 21H;显示文件内容
+     MOV BX,HANDLE
+     MOV AH,3EH
+     INT 21H;关闭文件
+     JNC CHECK2
+     JMP CHECK2
+ERROR1:
+    INT 21H
+    DISPLAY SMESSAGE
+    JMP CHECK2    
+ 
+ERROR2:    
+     DISPLAY ERRORMESSAGE
+     JMP CHECK2
+
+CHECKEND:
+     RET
+     CHECKPRO ENDP
+
+;----------------------------删除某个条目-------------------
+DELETEPRO PROC NEAR
+
+     
+
+     RET
+     DELETEPRO ENDP
 
 CODES ENDS
     END START
+
+
+
+
+
+
 
 
 
